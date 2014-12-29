@@ -131,9 +131,9 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.toolbar.setIconSize(QtCore.QSize(50,50))
         
         self.permissionAction = QtGui.QAction(KIcon('go-next'), 'Continue', self)
-		self.permissionAction.triggered.connect(self.grantPermission)
-		self.permissionAction.setDisabled(True)
-		self.toolbar.addAction(self.permissionAction)
+        self.permissionAction.triggered.connect(self.grantPermission)
+        self.permissionAction.setDisabled(True)
+        self.toolbar.addAction(self.permissionAction)
         self.toolbar.setIconSize(QtCore.QSize(50,50))
 
 
@@ -288,7 +288,7 @@ class BrewConnect_Window(QtGui.QMainWindow):
       
     def grantPermission(self):
         BREWERY.set_Tm1_BREWING_1_grantpermission(1)
-    	self.permissionAction.setDisabled(True)
+        self.permissionAction.setDisabled(True)
     
     def plotUpdate(self):
         self.boiltempchart.update_figure(xdata=self.time_array,ydata=self.B_TempFil_array)
