@@ -1,6 +1,7 @@
 #ifndef Tm1_BREWING_h
 #define Tm1_BREWING_h
 
+#include "VAR_PRESERVE.h"
 #include "RTD_PT100.h"
 #include "BREWERY_BUFFER.h"
 #include "stdfx.h"
@@ -16,14 +17,14 @@ void Tm1_boil();
 class Tm1_BREWING{
 public:
 	int arduinofd;
-	
+
 	int C_State;
 	double C_State_t0;
 	double wtime;
 
 	double  B_TempErr;
 	double  B_TempErr_I;
-	double  B_TempSet;
+	double_PRESERVE  B_TempSet;
 	double  B_ElemStatus;
 	double  B_ElemModInd;
 	double  M_TempErr;
@@ -51,7 +52,7 @@ public:
 	//RTD vars
 	RTD_PT100* B_RTD;
 	RTD_PT100* M_RTD;
-	
+
 	//Action Request variables
 	int	requestpermission;
 	int	grantpermission;
@@ -66,20 +67,20 @@ public:
 	void Tm1_mash();
 	void Tm1_boil();
 	void MashTemp_Update();
-	
+
 	//get functions
 	double get_wtime()			{ return this->wtime; 			}
 	double get_B_TempFil()		{ return this->B_TempFil; 		}
-	double get_B_TempSet()		{ return this->B_TempSet; 		}
-	double get_B_ElemModInd()	{ return this->B_ElemModInd;		}
+	double get_B_TempSet()		{ return this->B_TempSet.value; }
+	double get_B_ElemModInd()	{ return this->B_ElemModInd;	}
 	double get_M_TempFil()		{ return this->M_TempFil; 		}
 	double get_M_TempSet()		{ return this->M_TempSet; 		}
 	int    get_requestpermission(){ return this->requestpermission; 	}
 	int    get_C_State()		{ return this->C_State; 			}
 	double get_timeleft();
-	
+
 	//set functions
-	void set_B_TempSet(const double& _in1)		{ this->B_TempSet = _in1; 		}
+	void set_B_TempSet(const double& _in1)		{ if(this->B_TempSet.locked==false) this->B_TempSet.value = _in1; 		}
 	void set_M_TempSet(const double& _in1)		{ this->M_TempSet = _in1; 		}
 	void set_grantpermission(const int& _in1)	{ this->requestpermission = 0; this->grantpermission = _in1; 	}
 	void set_C_State(const int& _in1)			{ this->C_State = _in1; 			}
