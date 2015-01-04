@@ -1,4 +1,4 @@
-#include double_PRESERVE.h"
+#include "double_PRESERVE.h"
 
 //constructors
 double_PRESERVE::double_PRESERVE(const double& value_){
@@ -20,7 +20,7 @@ bool double_PRESERVE::set_value(const double& value_){
   else
     return false;
 }
-bool double_PRESERVE:ovr_value(const double& value_){
+bool double_PRESERVE::ovr_value(const double& value_){
   if(locked==false){
     value = value_;
     return true;
