@@ -1,3 +1,5 @@
+#include double_PRESERVE.h"
+
 //constructors
 double_PRESERVE::double_PRESERVE(const double& value_){
 	value = value_;
