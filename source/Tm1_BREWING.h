@@ -80,7 +80,7 @@ public:
 	double get_timeleft();
 
 	//set functions
-	void set_B_TempSet(const double& _in1)		{ if(this->B_TempSet.locked==false) this->B_TempSet.value = _in1; 		}
+	void set_B_TempSet(const double& _in1)		{ this->B_TempSet.set_value(_in1); 		}
 	void set_M_TempSet(const double& _in1)		{ this->M_TempSet = _in1; 		}
 	void set_grantpermission(const int& _in1)	{ this->requestpermission = 0; this->grantpermission = _in1; 	}
 	void set_C_State(const int& _in1)			{ this->C_State = _in1; 			}

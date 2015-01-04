@@ -184,7 +184,7 @@ void Tm1_BREWING::Tm1(double wtime_){
 	ardprint("degF",0);
 
 	ardprint("  B_TempSet: ",0);
-	ardprint(B_TempSet.value,0);
+	ardprint(B_TempSet.get_value,0);
 	ardprint("degF",0);
 
 	ardprint("  M_TempSet: ",0);
@@ -259,7 +259,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 0;
 		B_ElemStatus = 1;
 
-		if (B_TempSet.locked==true) B_TempSet.value = M_STRIKETEMP;
+		B_TempSet.set_value(M_STRIKETEMP);
 
 		//serialread=ardread();
 		serialread = grantpermission;
@@ -296,7 +296,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 1;
 		B_ElemStatus = 1;
 
-		if (B_TempSet.locked==true) B_TempSet.value = M_MASHTEMP;
+		B_TempSet.set_value(M_MASHTEMP);
 
 		B_TempErr_I = 0.0;
 		M_TempErr_I = 0.0;
@@ -334,7 +334,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 0;
 		B_ElemStatus = 1;
 
-		if (B_TempSet.locked==true) B_TempSet.value = M_MASHTEMP;
+		B_TempSet.set_value(M_MASHTEMP);
 
 		//serialread=ardread();
 		serialread = grantpermission;
@@ -418,7 +418,7 @@ void Tm1_BREWING::Tm1_state(){
 		B_ElemStatus = 1;
 
 		M_TempSet = 170.0;
-		if (B_TempSet.locked==true) B_TempSet.value = 175.0;
+		B_TempSet.set_value(175.0);
 
 		//serialread=ardread();
 		serialread = grantpermission;
@@ -628,13 +628,13 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 0;
 		B_ElemStatus = 1;
 
-		if (B_TempSet.locked==true) B_TempSet.value = B_BOILTEMP;
+		B_TempSet.set_value(B_BOILTEMP);
 
 		//serialread=ardread();
 		serialread = grantpermission;
 		if      (serialread=='w') C_State++;
 		else if (serialread=='s') C_State--;
-		else if (B_TempFil > B_TempSet.value - 10.0){
+		else if (B_TempFil > B_TempSet.get_value() - 10.0){
 			#ifdef warn0
   			ardprint("Boil preheated. Starting Timer",1);
 			#endif
@@ -656,7 +656,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 0;
 		B_ElemStatus = 1;
 
-		if (B_TempSet.locked==true) B_TempSet.value = B_BOILTEMP;
+		B_TempSet.set_value(B_BOILTEMP);
 
 		#ifdef warn0
 		ardprint("Time left in Boil: ",0);
@@ -785,11 +785,9 @@ void Tm1_BREWING::Tm1_mash(){
 	else if (M_TempErr_I < -1.0*M_TempErr_I_max) M_TempErr_I = -1.0*M_TempErr_I_max;
 
 	//Feedforward Mash temperature setpoint to boil then add Proportional and integral portions. Limit the boil setpoint to +/- the limiter around the Mash set point
-	if (B_TempSet.locked==true){
-		B_TempSet.value = M_TempSet + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I;
-		if      (B_TempSet.value > (M_TempSet + M_TempSet_max)) B_TempSet.value = M_TempSet + M_TempSet_max;
-		else if (B_TempSet.value < (M_TempSet - M_TempSet_max)) B_TempSet.value = M_TempSet - M_TempSet_max;
-	}
+  B_TempSet.set_value(M_TempSet + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I);
+  if      (B_TempSet.get_value() > (M_TempSet + M_TempSet_max)) B_TempSet.set_value(M_TempSet + M_TempSet_max);
+  else if (B_TempSet.get_value() < (M_TempSet - M_TempSet_max)) B_TempSet.set_value(M_TempSet - M_TempSet_max);
 
 	#ifdef warn2
 	ardprint("Done.",1);
@@ -807,7 +805,7 @@ void Tm1_BREWING::Tm1_boil(){
 
 	if (B_Temp >= 0.0) //ignore error values below 0.0
 		B_TempFil += (B_Temp-B_TempFil)*(DelTm1/(B_WTempFil));	//first-order lag filter on Boil Temperature
-	B_TempErr    = (B_TempSet.value - B_TempFil);					//calculate error from boil set point and boil filtered temperature
+	B_TempErr    = (B_TempSet.get_value() - B_TempFil);					//calculate error from boil set point and boil filtered temperature
 
 	//if Boil temp is less than 15deg of the boil set point, disable the PI loop, and set the element duty cycle to 100%s
 	if (B_TempErr > 15.0)
