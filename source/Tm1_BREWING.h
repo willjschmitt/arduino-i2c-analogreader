@@ -29,7 +29,7 @@ public:
 	double  B_ElemModInd;
 	double  M_TempErr;
 	double  M_TempErr_I;
-	double  M_TempSet;
+	double_PRESERVE  M_TempSet;
 	int     P1Status;
 	double  M_MASHTEMP; //in degreesF
 	double  M_STRIKETEMP; //in degreesF
@@ -71,17 +71,17 @@ public:
 	//get functions
 	double get_wtime()			{ return this->wtime; 			}
 	double get_B_TempFil()		{ return this->B_TempFil; 		}
-	double get_B_TempSet()		{ return this->B_TempSet.value; }
+	double get_B_TempSet()		{ return this->B_TempSet.get_value(); }
 	double get_B_ElemModInd()	{ return this->B_ElemModInd;	}
 	double get_M_TempFil()		{ return this->M_TempFil; 		}
-	double get_M_TempSet()		{ return this->M_TempSet; 		}
+	double get_M_TempSet()		{ return this->M_TempSet.get_value(); 		}
 	int    get_requestpermission(){ return this->requestpermission; 	}
 	int    get_C_State()		{ return this->C_State; 			}
 	double get_timeleft();
 
 	//set functions
-	void set_B_TempSet(const double& _in1)		{ this->B_TempSet.set_value(_in1); 		}
-	void set_M_TempSet(const double& _in1)		{ this->M_TempSet = _in1; 		}
+	void set_B_TempSet(const double& _in1)		{ this->B_TempSet.ovr_value(_in1); 		}
+	void set_M_TempSet(const double& _in1)		{ this->M_TempSet.ovr_value(_in1); 		}
 	void set_grantpermission(const int& _in1)	{ this->requestpermission = 0; this->grantpermission = _in1; 	}
 	void set_C_State(const int& _in1)			{ this->C_State = _in1; 			}
 };

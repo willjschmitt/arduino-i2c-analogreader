@@ -184,11 +184,11 @@ void Tm1_BREWING::Tm1(double wtime_){
 	ardprint("degF",0);
 
 	ardprint("  B_TempSet: ",0);
-	ardprint(B_TempSet.get_value,0);
+	ardprint(B_TempSet.get_value(),0);
 	ardprint("degF",0);
 
 	ardprint("  M_TempSet: ",0);
-	ardprint(M_TempSet,0);
+	ardprint(M_TempSet.get_value(),0);
 	ardprint("degF",1);
 	#endif
 
@@ -383,7 +383,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 1;
 		B_ElemStatus = 1;
 
-		M_TempSet = M_MASHTEMP;
+		M_TempSet.set_value(M_MASHTEMP);
 
 		#ifdef warn0
 		ardprint("Time left in Mash: ",0);
@@ -417,7 +417,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 1;
 		B_ElemStatus = 1;
 
-		M_TempSet = 170.0;
+		M_TempSet.set_value(170.0);
 		B_TempSet.set_value(175.0);
 
 		//serialread=ardread();
@@ -449,7 +449,7 @@ void Tm1_BREWING::Tm1_state(){
 		P1Status = 1;
 		B_ElemStatus = 1;
 
-		M_TempSet = 170.0;
+		M_TempSet.set_value(170.0);
 
 		#ifdef warn0
 		ardprint("Time left in Mashout: ",0);
@@ -776,7 +776,7 @@ void Tm1_BREWING::Tm1_mash(){
 
 	if (M_Temp >= 0.0)//ignore error values below 0.0
 		M_TempFil += (M_Temp-M_TempFil)*(DelTm1/(M_WTempFil)); 	//first-order lag filter on Mash Temperature
-	M_TempErr    = (M_TempSet - M_TempFil); 				// calculate error from Mash set point and mash filter temperature
+	M_TempErr    = (M_TempSet.get_value() - M_TempFil); 				// calculate error from Mash set point and mash filter temperature
 
 	//Calculate Integral of error; if temperature has overshot, pull integral portion back FAST (there is no cooldown ability, so this is important)
 	if (M_TempErr > 0.0) M_TempErr_I += (M_TempErr)*(DelTm1);
@@ -785,9 +785,9 @@ void Tm1_BREWING::Tm1_mash(){
 	else if (M_TempErr_I < -1.0*M_TempErr_I_max) M_TempErr_I = -1.0*M_TempErr_I_max;
 
 	//Feedforward Mash temperature setpoint to boil then add Proportional and integral portions. Limit the boil setpoint to +/- the limiter around the Mash set point
-  B_TempSet.set_value(M_TempSet + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I);
-  if      (B_TempSet.get_value() > (M_TempSet + M_TempSet_max)) B_TempSet.set_value(M_TempSet + M_TempSet_max);
-  else if (B_TempSet.get_value() < (M_TempSet - M_TempSet_max)) B_TempSet.set_value(M_TempSet - M_TempSet_max);
+  B_TempSet.set_value(M_TempSet.get_value() + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I);
+  if      (B_TempSet.get_value() > (M_TempSet.get_value() + M_TempSet_max)) B_TempSet.set_value(M_TempSet.get_value() + M_TempSet_max);
+  else if (B_TempSet.get_value() < (M_TempSet.get_value() - M_TempSet_max)) B_TempSet.set_value(M_TempSet.get_value() - M_TempSet_max);
 
 	#ifdef warn2
 	ardprint("Done.",1);
