@@ -2,7 +2,13 @@
 #define stdfx_h
 
 #include <iostream>
+
+#ifndef noRPi
 #include <wiringPi.h>
+#else
+#include "wiringPi_mock.h"
+#endif
+
 #include <time.h>
 
 //define warning levels
