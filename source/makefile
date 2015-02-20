@@ -19,6 +19,7 @@ LLIBS = -lwiringPi
 CSRCS = \
 	BREWERY_wrap.c
 
+# define the CPP source files
 CPPSRCS = \
 	ARD_Aread.cpp \
 	BREWERY.cpp \
@@ -34,21 +35,16 @@ CTESTENVSRCS =
 CPPTESTENVSRCS = \
 	wiringPi_mock.cpp \
 	wiringPiI2C_mock.cpp
-	
-	
-ifneq (,$(findstring noRPi,$(MAKEFLAGS)))
-	CSRCS = $(join $(CSRCS),$(CTESTENVSRCS))
-	CPPSRCS = $(join $(CPPSRCS),$(CPPTESTENVSRCS))
-	CFLAGS = $(join $(CFLAGS),-DnoRPi)
+
+
+ifeq ($(NORPI),1)
+	CSRCS   += $(CTESTENVSRCS)
+	CPPSRCS += $(CPPTESTENVSRCS)
+	CFLAGS  += -DnoRPi
 endif
 
-# define the C object files 
+# define the C/CPP object files 
 #
-# This uses Suffix Replacement within a macro:
-#   $(name:string1=string2)
-#         For each word in 'name' replace 'string1' with 'string2'
-# Below we are replacing the suffix .c of all words in the macro SRCS
-# with the .o suffix
 #
 COBJS   = $(CSRCS:.c=.o)
 CPPOBJS = $(CPPSRCS:.cpp=.o)
@@ -56,6 +52,7 @@ CPPOBJS = $(CPPSRCS:.cpp=.o)
 
 # define the executable file 
 BINARY = _BREWERY.so
+BINARY_TEST = _BREWERY.so
 
 #
 # The following part of the makefile is generic; it can be used to 
