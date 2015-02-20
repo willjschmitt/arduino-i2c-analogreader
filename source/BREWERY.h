@@ -10,8 +10,13 @@
 #include "BREWERY_BUFFER.h"
 #include "TMP36.h"
 
+#ifndef noRPi
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#else
+#include "wiringPi_mock.h"
+#include "wiringPiI2C_mock.h"
+#endif
 
 extern int test();
 
