@@ -650,7 +650,7 @@ void Tm1_BREWING::Tm1_state(){
 		serialread = grantpermission;
 		if      (serialread=='w') C_State++;
 		else if (serialread=='s') C_State--;
-		else if (B_TempFil > B_TempSet.get_value() - 10.0){
+		else if (B_TempFil > B_TempSet - 10.0){
 			#ifdef warn0
   			ardprint("Boil preheated. Starting Timer",1);
 			#endif
@@ -792,7 +792,7 @@ void Tm1_BREWING::Tm1_mash(){
 
 	if (M_Temp >= 0.0)//ignore error values below 0.0
 		M_TempFil += (M_Temp-M_TempFil)*(DelTm1/(M_WTempFil)); 	//first-order lag filter on Mash Temperature
-	M_TempErr    = (M_TempSet.get_value() - M_TempFil); 				// calculate error from Mash set point and mash filter temperature
+	M_TempErr    = M_TempSet - M_TempFil; 				// calculate error from Mash set point and mash filter temperature
 
 	//Calculate Integral of error; if temperature has overshot, pull integral portion back FAST (there is no cooldown ability, so this is important)
 	if (M_TempErr > 0.0) M_TempErr_I += (M_TempErr)*(DelTm1);
@@ -802,8 +802,8 @@ void Tm1_BREWING::Tm1_mash(){
 
 	//Feedforward Mash temperature setpoint to boil then add Proportional and integral portions. Limit the boil setpoint to +/- the limiter around the Mash set point
   B_TempSet = M_TempSet + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I;
-  if      (B_TempSet.get_value() > (M_TempSet.get_value() + M_TempSet_max)) B_TempSet = M_TempSet + M_TempSet_max;
-  else if (B_TempSet.get_value() < (M_TempSet.get_value() - M_TempSet_max)) B_TempSet = M_TempSet - M_TempSet_max;
+  if      (B_TempSet > (M_TempSet + M_TempSet_max)) B_TempSet = M_TempSet + M_TempSet_max;
+  else if (B_TempSet < (M_TempSet - M_TempSet_max)) B_TempSet = M_TempSet - M_TempSet_max;
 
 	#ifdef warn2
 	ardprint("Done.",1);

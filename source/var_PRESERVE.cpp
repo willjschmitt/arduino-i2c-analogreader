@@ -26,6 +26,14 @@ template <class T> bool var_PRESERVE<T>::set_value(const T& value_){
     return false;
 }
 
+template <class T> bool var_PRESERVE<T>::ovr_value(const T& value_){
+  value = value_;
+  locked = true;
+
+  return true;
+}
+
+//arithmetic operators
 template <class T> var_PRESERVE<T>&  var_PRESERVE<T>::operator= (const T& value_){
 	if (!locked){
 		this->value = value_;
@@ -43,17 +51,42 @@ template <class T> T  var_PRESERVE<T>::operator- (const T& value_){
 	return this->value - value_;
 }
 
-template <class T> bool var_PRESERVE<T>::ovr_value(const T& value_){
-  value = value_;
-  locked = true;
-
-  return true;
+//logical operators
+template <class T> bool var_PRESERVE<T>::operator< (const T& value_){
+	if (this->value < value_) return true;
+	else                      return false;
+}
+template <class T> bool var_PRESERVE<T>::operator< (const var_PRESERVE<T>& value_){
+	if (this->value < value_.value) return true;
+	else                             return false;
 }
 
-/*template <class T> operator +(var_PRESERVE<T> a, T b){
-	return a.get_value() + b;
-}*/
+template <class T> bool var_PRESERVE<T>::operator<= (const T& value_){
+	if (this->value <= value_) return true;
+	else                      return false;
+}
+template <class T> bool var_PRESERVE<T>::operator<= (const var_PRESERVE<T>& value_){
+	if (this->value <= value_.value) return true;
+	else                             return false;
+}
 
+template <class T> bool var_PRESERVE<T>::operator> (const T& value_){
+	if (this->value > value_) return true;
+	else                      return false;
+}
+template <class T> bool var_PRESERVE<T>::operator> (const var_PRESERVE<T>& value_){
+	if (this->value > value_.value) return true;
+	else                             return false;
+}
+
+template <class T> bool var_PRESERVE<T>::operator>= (const T& value_){
+	if (this->value >= value_) return true;
+	else                      return false;
+}
+template <class T> bool var_PRESERVE<T>::operator>= (const var_PRESERVE<T>& value_){
+	if (this->value >= value_.value) return true;
+	else                             return false;
+}
 
 //locking functions
 template <class T> bool var_PRESERVE<T>::lock(){

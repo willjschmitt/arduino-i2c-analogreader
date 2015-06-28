@@ -17,10 +17,23 @@ public:
 	bool set_value(const T& value_);
 	bool ovr_value(const T& value_);
 
-	//operators
-	var_PRESERVE<T>&  operator= (const T& value_);
-	T                 operator+ (const T& value_);
-	T                 operator- (const T& value_);
+	//arithmetic operators
+	var_PRESERVE<T>&  operator=  (const T& value_);
+	T                 operator+  (const T& value_);
+	T                 operator-  (const T& value_);
+
+	//logical operators
+	bool              operator>  (const T& value_);
+	bool              operator>  (const var_PRESERVE<T>& value_);
+
+	bool              operator>= (const T& value_);
+	bool              operator>= (const var_PRESERVE<T>& value_);
+
+	bool              operator<  (const T& value_);
+	bool              operator<  (const var_PRESERVE<T>& value_);
+
+	bool              operator<= (const T& value_);
+	bool              operator<= (const var_PRESERVE<T>& value_);
 
 
 	bool lock();
