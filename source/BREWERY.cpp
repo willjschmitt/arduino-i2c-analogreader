@@ -203,18 +203,22 @@ void F_CompSwitch(){
 
 //BREWERY ACCESSORS
 //get functions
-double get_Tm1_BREWING_1_wtime()			{ return wtime; 							}
-double get_Tm1_BREWING_1_B_TempFil()		{ return Tm1_BREWING_1->get_B_TempFil(); 		}
-double get_Tm1_BREWING_1_B_TempSet()		{ return Tm1_BREWING_1->get_B_TempSet(); 		}
-double get_Tm1_BREWING_1_B_ElemModInd()		{ return Tm1_BREWING_1->get_B_ElemModInd();		}
-double get_Tm1_BREWING_1_M_TempFil()		{ return Tm1_BREWING_1->get_M_TempFil(); 		}
-double get_Tm1_BREWING_1_M_TempSet()		{ return Tm1_BREWING_1->get_M_TempSet(); 		}
-int    get_Tm1_BREWING_1_requestpermission(){ return Tm1_BREWING_1->get_requestpermission(); 	}
-int    get_Tm1_BREWING_1_C_State()		{ return Tm1_BREWING_1->get_C_State(); 			}
-double get_Tm1_BREWING_1_timeleft()		{ return Tm1_BREWING_1->get_timeleft();			}
+double get_Tm1_BREWING_1_wtime()			{ return wtime;                                  }
+double get_Tm1_BREWING_1_B_TempFil()		{ return Tm1_BREWING_1->get_B_TempFil();         }
+double get_Tm1_BREWING_1_B_TempSet()		{ return Tm1_BREWING_1->get_B_TempSet();         }
+bool   get_Tm1_BREWING_1_B_TempSet_lock()   { return Tm1_BREWING_1->get_B_TempSet_lock();    }
+double get_Tm1_BREWING_1_B_ElemModInd()		{ return Tm1_BREWING_1->get_B_ElemModInd();      }
+double get_Tm1_BREWING_1_M_TempFil()		{ return Tm1_BREWING_1->get_M_TempFil();         }
+double get_Tm1_BREWING_1_M_TempSet()		{ return Tm1_BREWING_1->get_M_TempSet();         }
+bool   get_Tm1_BREWING_1_M_TempSet_lock()   { return Tm1_BREWING_1->get_M_TempSet_lock();    }
+int    get_Tm1_BREWING_1_requestpermission(){ return Tm1_BREWING_1->get_requestpermission(); }
+int    get_Tm1_BREWING_1_C_State()		    { return Tm1_BREWING_1->get_C_State();           }
+double get_Tm1_BREWING_1_timeleft()		    { return Tm1_BREWING_1->get_timeleft();          }
 
 //set functions
-void set_Tm1_BREWING_1_B_TempSet(const double& _in1)		{ Tm1_BREWING_1->set_B_TempSet(_in1); 		}
-void set_Tm1_BREWING_1_M_TempSet(const double& _in1)		{ Tm1_BREWING_1->set_M_TempSet(_in1); 		}
-void set_Tm1_BREWING_1_grantpermission(const int& _in1)	{ Tm1_BREWING_1->set_grantpermission(_in1); 	}
-void set_Tm1_BREWING_1_C_State(const int& _in1)			{ Tm1_BREWING_1->set_C_State(_in1); 		}
+void set_Tm1_BREWING_1_B_TempSet(const double& _in1)    { Tm1_BREWING_1->set_B_TempSet(_in1);       }
+void set_Tm1_BREWING_1_B_TempSet_lock(const bool& _in1) { Tm1_BREWING_1->set_B_TempSet_lock(_in1);  }
+void set_Tm1_BREWING_1_M_TempSet(const double& _in1)    { Tm1_BREWING_1->set_M_TempSet(_in1);       }
+void set_Tm1_BREWING_1_M_TempSet_lock(const bool& _in1) { Tm1_BREWING_1->set_M_TempSet_lock(_in1);  }
+void set_Tm1_BREWING_1_grantpermission(const int& _in1)	{ Tm1_BREWING_1->set_grantpermission(_in1); }
+void set_Tm1_BREWING_1_C_State(const int& _in1)			{ Tm1_BREWING_1->set_C_State(_in1);         }

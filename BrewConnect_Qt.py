@@ -43,55 +43,73 @@ class BrewDynamicCanvas(BrewFigureCanvas):
         BrewFigureCanvas.__init__(self, *args, **kwargs)
 
     def compute_initial_figure(self):
-         self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
 
     def update_figure(self, xdata="", ydata=""):
         self.axes.plot(xdata, ydata, 'r')
         maxtime = xdata[len(xdata)-1]
         mintime = maxtime-20.0
         if mintime < 0.0:
-		   mintime = 0.0
+            mintime = 0.0
         self.axes.set_xlim([mintime, maxtime]) #need to figure out x limit
         self.draw()
 
 class dataLabel(QtGui.QWidget):
-    def __init__(self, parent=None, labeltext="Label Text:", unittext="", manualable=0, increaseaction="", decreaseaction=""):
+    def __init__(self, parent=None, labeltext="", unittext="", manualable=0, increaseaction="", decreaseaction="", lockaction=""):
         QtGui.QWidget.__init__(self)
         self.content = QtGui.QHBoxLayout(self)
+        self.unittext = unittext
 
         labelfont = QtGui.QFont()
         labelfont.setPointSize(10)
         
         self.textlabel = QtGui.QLabel(labeltext)
-        self.datalabel = QtGui.QLabel(str(0.0))
-        self.unitlabel = QtGui.QLabel(unittext)
+        self.datalabel = QtGui.QLabel(str(0.0) + " " + self.unittext)
 
         self.textlabel.setFont(labelfont)
         self.datalabel.setFont(labelfont)
-        self.unitlabel.setFont(labelfont)
         
         self.content.addWidget(self.textlabel)
         self.content.addWidget(self.datalabel)
-        self.content.addWidget(self.unitlabel)
 
-        if manualable==1:
-            self.adjustor = QtGui.QVBoxLayout()
-            self.upadjustor = QtGui.QPushButton("",self)
+        #add the interactive content if speficied
+        self.adjustor = QtGui.QVBoxLayout()
+        self.locker   = QtGui.QVBoxLayout()
+        if manualable==1:    
+            #adjuster knobs
             if (increaseaction != ""):
+                self.upadjustor = QtGui.QPushButton("",self)
                 self.upadjustor.clicked.connect(increaseaction)
-            self.dnadjustor = QtGui.QPushButton("",self)
+                self.upadjustor.setIcon(KIcon('go-up'))
+                self.upadjustor.setIconSize(QtCore.QSize(15,15))
+                self.adjustor.addWidget(self.upadjustor)
             if (decreaseaction != ""):
+                self.dnadjustor = QtGui.QPushButton("",self)
                 self.dnadjustor.clicked.connect(decreaseaction)
-            self.upadjustor.setIcon(KIcon('go-up'))
-            self.dnadjustor.setIcon(KIcon('go-down'))
-            self.upadjustor.setIconSize(QtCore.QSize(15,15))
-            self.dnadjustor.setIconSize(QtCore.QSize(15,15))
-            self.adjustor.addWidget(self.upadjustor)
-            self.adjustor.addWidget(self.dnadjustor)
-            self.content.addLayout(self.adjustor)
+                self.dnadjustor.setIcon(KIcon('go-down'))
+                self.dnadjustor.setIconSize(QtCore.QSize(15,15))
+                self.adjustor.addWidget(self.dnadjustor)
+            
+            #lock knobs
+            if (lockaction != ""):
+                self.locker_button = QtGui.QPushButton("",self)
+                self.locker_button.clicked.connect(lockaction)
+                self.locker_button.setIcon(QtGui.QIcon('img/unlocked.ico'))
+                self.locker_button.setIconSize(QtCore.QSize(45,45))
+                self.locker.addWidget(self.locker_button)
+            
+        self.content.addLayout(self.adjustor)
+        self.content.addLayout(self.locker)
             
     def updateData(self, newvalue):
-        self.datalabel.setText('{:03.2f}'.format(newvalue))
+        self.datalabel.setText('{:03.2f}'.format(newvalue) + " " +  self.unittext)
+        
+    def updateLock(self, lockstate):
+        if lockstate == True:
+            self.locker_button.setIcon(QtGui.QIcon('img/locked.ico'))
+        else:
+            self.locker_button.setIcon(QtGui.QIcon('img/unlocked.ico'))
+            
             
 
 class BrewConnect_Window(QtGui.QMainWindow):
@@ -163,9 +181,9 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.graphs.addWidget(self.mashtempchart)
 
         self.boiltemp_act = dataLabel(labeltext="Boil Temp:", unittext="degF", manualable=0)
-        self.boiltemp_set = dataLabel(labeltext="Boil SetPt:", unittext="degF", manualable=1, increaseaction=self.increase_B_TempSet, decreaseaction=self.decrease_B_TempSet)
+        self.boiltemp_set = dataLabel(labeltext="Boil SetPt:", unittext="degF", manualable=1, increaseaction=self.increase_B_TempSet, decreaseaction=self.decrease_B_TempSet, lockaction=self.locktoggle_B_TempSet)
         self.mashtemp_act = dataLabel(labeltext="Mash Temp:", unittext="degF", manualable=0)
-        self.mashtemp_set = dataLabel(labeltext="Mash SetPt:", unittext="degF", manualable=1, increaseaction=self.increase_M_TempSet, decreaseaction=self.decrease_M_TempSet)
+        self.mashtemp_set = dataLabel(labeltext="Mash SetPt:", unittext="degF", manualable=1, increaseaction=self.increase_M_TempSet, decreaseaction=self.decrease_M_TempSet, lockaction=self.locktoggle_M_TempSet)
         self.controlstate = dataLabel(labeltext="CTRL State:", unittext="", manualable=1, increaseaction=self.increase_C_State, decreaseaction=self.decrease_C_State)
         self.timeleft_lab = dataLabel(labeltext="Time Left:",  unittext="min", manualable=0)
         self.datavals.addWidget(self.boiltemp_act)
@@ -258,33 +276,40 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.close()
 
     def dataUpdate(self):
-	   self.time_array.append((BREWERY.get_Tm1_BREWING_1_wtime() - self.start_time)/(1000.0*60.0))
-	   self.B_TempFil_array.append(BREWERY.get_Tm1_BREWING_1_B_TempFil())
-	   self.M_TempFil_array.append(BREWERY.get_Tm1_BREWING_1_M_TempFil())
-	   
-	   B_TempFil = BREWERY.get_Tm1_BREWING_1_B_TempFil()
-	   B_TempSet = BREWERY.get_Tm1_BREWING_1_B_TempSet()
-	   M_TempFil = BREWERY.get_Tm1_BREWING_1_M_TempFil()
-	   M_TempSet = BREWERY.get_Tm1_BREWING_1_M_TempSet()
-	   C_State   = BREWERY.get_Tm1_BREWING_1_C_State()
-	   timeleft  = BREWERY.get_Tm1_BREWING_1_timeleft()
-	   self.boiltemp_act.updateData(B_TempFil)
-	   self.boiltemp_set.updateData(B_TempSet)
-	   self.mashtemp_act.updateData(M_TempFil)
-	   self.mashtemp_set.updateData(M_TempSet)
-	   self.controlstate.updateData(C_State)
-	   self.timeleft_lab.updateData(timeleft)
-	   self.statuslabel.setText(self.statustexts[C_State])
-	   
-	   requestpermission_z1 = self.requestpermission
-	   self.requestpermission = BREWERY.get_Tm1_BREWING_1_requestpermission()
-	   if ((requestpermission_z1==0)and(self.requestpermission==1)):
-		   self.askuserforpermission()
+        self.time_array.append((BREWERY.get_Tm1_BREWING_1_wtime() - self.start_time)/(1000.0*60.0))
+        self.B_TempFil_array.append(BREWERY.get_Tm1_BREWING_1_B_TempFil())
+        self.M_TempFil_array.append(BREWERY.get_Tm1_BREWING_1_M_TempFil())
+        
+        #get data from the controls
+        B_TempFil        = BREWERY.get_Tm1_BREWING_1_B_TempFil()
+        B_TempSet        = BREWERY.get_Tm1_BREWING_1_B_TempSet()
+        B_TempSet_locked = BREWERY.get_Tm1_BREWING_1_B_TempSet_lock()
+        M_TempFil        = BREWERY.get_Tm1_BREWING_1_M_TempFil()
+        M_TempSet        = BREWERY.get_Tm1_BREWING_1_M_TempSet()
+        M_TempSet_locked = BREWERY.get_Tm1_BREWING_1_M_TempSet_lock()
+        C_State          = BREWERY.get_Tm1_BREWING_1_C_State()
+        timeleft         = BREWERY.get_Tm1_BREWING_1_timeleft()
+        
+        #call updater functions to present data to user
+        self.boiltemp_act.updateData(B_TempFil)
+        self.boiltemp_set.updateData(B_TempSet)
+        self.boiltemp_set.updateLock(B_TempSet_locked)
+        self.mashtemp_act.updateData(M_TempFil)
+        self.mashtemp_set.updateData(M_TempSet)
+        self.mashtemp_set.updateLock(M_TempSet_locked)
+        self.controlstate.updateData(C_State)
+        self.timeleft_lab.updateData(timeleft)
+        self.statuslabel.setText(self.statustexts[C_State])
+        
+        #check the permission routines
+        requestpermission_z1 = self.requestpermission
+        self.requestpermission = BREWERY.get_Tm1_BREWING_1_requestpermission()
+        if ((requestpermission_z1==0)and(self.requestpermission==1)):
+            self.askuserforpermission()
     
     def askuserforpermission(self):
         self.permissionAction.setEnabled(True)    
         #reply = QtGui.QMessageBox.question(self, 'Message',"Advance to next stage?", QtGui.QMessageBox.Ok)
-        
       
     def grantPermission(self):
         BREWERY.set_Tm1_BREWING_1_grantpermission(1)
@@ -295,25 +320,31 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.mashtempchart.update_figure(xdata=self.time_array,ydata=self.M_TempFil_array)
         
     def CTRLloop(self):
-	   BREWERY.loop()
+        BREWERY.loop()
         
     def increase_B_TempSet(self):
-	   BREWERY.set_Tm1_BREWING_1_B_TempSet(BREWERY.get_Tm1_BREWING_1_B_TempSet() + 1.0)
-	   
+        BREWERY.set_Tm1_BREWING_1_B_TempSet(BREWERY.get_Tm1_BREWING_1_B_TempSet() + 1.0)
+
     def decrease_B_TempSet(self):
-	   BREWERY.set_Tm1_BREWING_1_B_TempSet(BREWERY.get_Tm1_BREWING_1_B_TempSet() - 1.0)
-	   
+        BREWERY.set_Tm1_BREWING_1_B_TempSet(BREWERY.get_Tm1_BREWING_1_B_TempSet() - 1.0)
+       
+    def locktoggle_B_TempSet(self):
+        BREWERY.set_Tm1_BREWING_1_B_TempSet_lock(1 - BREWERY.get_Tm1_BREWING_1_B_TempSet_lock())
+        
     def increase_M_TempSet(self):
-	   BREWERY.set_Tm1_BREWING_1_M_TempSet(BREWERY.get_Tm1_BREWING_1_M_TempSet() + 1.0)
-	   
+        BREWERY.set_Tm1_BREWING_1_M_TempSet(BREWERY.get_Tm1_BREWING_1_M_TempSet() + 1.0)
+
     def decrease_M_TempSet(self):
-	   BREWERY.set_Tm1_BREWING_1_M_TempSet(BREWERY.get_Tm1_BREWING_1_M_TempSet() - 1.0)	   
-	   
+        BREWERY.set_Tm1_BREWING_1_M_TempSet(BREWERY.get_Tm1_BREWING_1_M_TempSet() - 1.0)
+    
+    def locktoggle_M_TempSet(self):
+        BREWERY.set_Tm1_BREWING_1_M_TempSet_lock(1 - BREWERY.get_Tm1_BREWING_1_M_TempSet_lock())
+
     def increase_C_State(self):
-	   BREWERY.set_Tm1_BREWING_1_C_State(BREWERY.get_Tm1_BREWING_1_C_State() + 1)
-	   
+        BREWERY.set_Tm1_BREWING_1_C_State(BREWERY.get_Tm1_BREWING_1_C_State() + 1)
+
     def decrease_C_State(self):
-	   BREWERY.set_Tm1_BREWING_1_C_State(BREWERY.get_Tm1_BREWING_1_C_State() - 1)
+        BREWERY.set_Tm1_BREWING_1_C_State(BREWERY.get_Tm1_BREWING_1_C_State() - 1)
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Message',

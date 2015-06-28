@@ -15,6 +15,9 @@ template <class T> var_PRESERVE<T>::var_PRESERVE(const T& value_){
 template <class T> T var_PRESERVE<T>::get_value(){
   return value;
 }
+template <class T> bool var_PRESERVE<T>::get_locked(){
+  return locked;
+}
 
 //modifiers
 template <class T> bool var_PRESERVE<T>::set_value(const T& value_){

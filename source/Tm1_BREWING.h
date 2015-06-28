@@ -72,16 +72,20 @@ public:
 	double get_wtime();
 	double get_B_TempFil();
 	double get_B_TempSet();
+	bool   get_B_TempSet_lock();
 	double get_B_ElemModInd();
 	double get_M_TempFil();
 	double get_M_TempSet();
+	bool   get_M_TempSet_lock();
 	int    get_requestpermission();
 	int    get_C_State();
 	double get_timeleft();
 
 	//set functions
 	void set_B_TempSet(const double& _in1);
+	void set_B_TempSet_lock(const bool& _in1);
 	void set_M_TempSet(const double& _in1);
+	void set_M_TempSet_lock(const bool& _in1);
 	void set_grantpermission(const int& _in1);
 	void set_C_State(const int& _in1);
 };

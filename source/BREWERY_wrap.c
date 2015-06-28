@@ -2951,6 +2951,13 @@ static swig_module_info swig_module = {swig_types, 1, 0, 0, 0, 0};
 
 
 SWIGINTERNINLINE PyObject*
+  SWIG_From_bool  (bool value)
+{
+  return PyBool_FromLong(value ? 1 : 0);
+}
+
+
+SWIGINTERNINLINE PyObject*
   SWIG_From_int  (int value)
 {
   return PyInt_FromLong((long) value);
@@ -2999,16 +3006,6 @@ SWIG_AsVal_double (PyObject *obj, double *val)
 #endif
   return res;
 }
-
-
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
-#endif
 
 
 #include <float.h>
@@ -3084,6 +3081,27 @@ SWIG_AsVal_long (PyObject *obj, long* val)
 #endif
   return SWIG_TypeError;
 }
+
+
+SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
+}
+
+
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
 
 
 SWIGINTERN int
@@ -3179,6 +3197,19 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_get_Tm1_BREWING_1_B_TempSet_lock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)":get_Tm1_BREWING_1_B_TempSet_lock")) SWIG_fail;
+  result = (bool)get_Tm1_BREWING_1_B_TempSet_lock();
+  resultobj = SWIG_From_bool((bool)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_get_Tm1_BREWING_1_B_ElemModInd(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double result;
@@ -3212,6 +3243,19 @@ SWIGINTERN PyObject *_wrap_get_Tm1_BREWING_1_M_TempSet(PyObject *SWIGUNUSEDPARM(
   if (!PyArg_ParseTuple(args,(char *)":get_Tm1_BREWING_1_M_TempSet")) SWIG_fail;
   result = (double)get_Tm1_BREWING_1_M_TempSet();
   resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_get_Tm1_BREWING_1_M_TempSet_lock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)":get_Tm1_BREWING_1_M_TempSet_lock")) SWIG_fail;
+  result = (bool)get_Tm1_BREWING_1_M_TempSet_lock();
+  resultobj = SWIG_From_bool((bool)(result));
   return resultobj;
 fail:
   return NULL;
@@ -3280,6 +3324,29 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_B_TempSet_lock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  bool *arg1 = 0 ;
+  bool temp1 ;
+  bool val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:set_Tm1_BREWING_1_B_TempSet_lock",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_bool(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_Tm1_BREWING_1_B_TempSet_lock" "', argument " "1"" of type '" "bool""'");
+  } 
+  temp1 = (bool)(val1);
+  arg1 = &temp1;
+  set_Tm1_BREWING_1_B_TempSet_lock((bool const &)*arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_M_TempSet(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double *arg1 = 0 ;
@@ -3296,6 +3363,29 @@ SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_M_TempSet(PyObject *SWIGUNUSEDPARM(
   temp1 = (double)(val1);
   arg1 = &temp1;
   set_Tm1_BREWING_1_M_TempSet((double const &)*arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_M_TempSet_lock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  bool *arg1 = 0 ;
+  bool temp1 ;
+  bool val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:set_Tm1_BREWING_1_M_TempSet_lock",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_bool(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_Tm1_BREWING_1_M_TempSet_lock" "', argument " "1"" of type '" "bool""'");
+  } 
+  temp1 = (bool)(val1);
+  arg1 = &temp1;
+  set_Tm1_BREWING_1_M_TempSet_lock((bool const &)*arg1);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -3357,14 +3447,18 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"get_Tm1_BREWING_1_wtime", _wrap_get_Tm1_BREWING_1_wtime, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_B_TempFil", _wrap_get_Tm1_BREWING_1_B_TempFil, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_B_TempSet", _wrap_get_Tm1_BREWING_1_B_TempSet, METH_VARARGS, NULL},
+	 { (char *)"get_Tm1_BREWING_1_B_TempSet_lock", _wrap_get_Tm1_BREWING_1_B_TempSet_lock, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_B_ElemModInd", _wrap_get_Tm1_BREWING_1_B_ElemModInd, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_M_TempFil", _wrap_get_Tm1_BREWING_1_M_TempFil, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_M_TempSet", _wrap_get_Tm1_BREWING_1_M_TempSet, METH_VARARGS, NULL},
+	 { (char *)"get_Tm1_BREWING_1_M_TempSet_lock", _wrap_get_Tm1_BREWING_1_M_TempSet_lock, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_requestpermission", _wrap_get_Tm1_BREWING_1_requestpermission, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_C_State", _wrap_get_Tm1_BREWING_1_C_State, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_timeleft", _wrap_get_Tm1_BREWING_1_timeleft, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_B_TempSet", _wrap_set_Tm1_BREWING_1_B_TempSet, METH_VARARGS, NULL},
+	 { (char *)"set_Tm1_BREWING_1_B_TempSet_lock", _wrap_set_Tm1_BREWING_1_B_TempSet_lock, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_M_TempSet", _wrap_set_Tm1_BREWING_1_M_TempSet, METH_VARARGS, NULL},
+	 { (char *)"set_Tm1_BREWING_1_M_TempSet_lock", _wrap_set_Tm1_BREWING_1_M_TempSet_lock, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_grantpermission", _wrap_set_Tm1_BREWING_1_grantpermission, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_C_State", _wrap_set_Tm1_BREWING_1_C_State, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }

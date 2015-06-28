@@ -61,15 +61,19 @@ Tm1_BREWING::Tm1_BREWING(BREWERY_BUFFER** brewbuff_, const int& arduinofd_){
 double Tm1_BREWING::get_wtime()			{ return this->wtime; 			}
 double Tm1_BREWING::get_B_TempFil()		{ return this->B_TempFil; 		}
 double Tm1_BREWING::get_B_TempSet()		{ return this->B_TempSet.get_value(); }
+bool   Tm1_BREWING::get_B_TempSet_lock(){ return this->B_TempSet.get_locked(); }
 double Tm1_BREWING::get_B_ElemModInd()	{ return this->B_ElemModInd;	}
 double Tm1_BREWING::get_M_TempFil()		{ return this->M_TempFil; 		}
 double Tm1_BREWING::get_M_TempSet()		{ return this->M_TempSet.get_value(); 		}
+bool   Tm1_BREWING::get_M_TempSet_lock(){ return this->M_TempSet.get_locked(); }
 int    Tm1_BREWING::get_requestpermission(){ return this->requestpermission; 	}
 int    Tm1_BREWING::get_C_State()		{ return this->C_State; 			}
 
 //set functions
 void Tm1_BREWING::set_B_TempSet(const double& _in1)		{ this->B_TempSet.ovr_value(_in1); 		}
+void Tm1_BREWING::set_B_TempSet_lock(const bool& _in1)  { if (_in1) this->B_TempSet.lock(); else this->B_TempSet.unlock(); }
 void Tm1_BREWING::set_M_TempSet(const double& _in1)		{ this->M_TempSet.ovr_value(_in1); 		}
+void Tm1_BREWING::set_M_TempSet_lock(const bool& _in1)  { if (_in1) this->M_TempSet.lock(); else this->M_TempSet.unlock(); }
 void Tm1_BREWING::set_grantpermission(const int& _in1)	{ this->requestpermission = 0; this->grantpermission = _in1; 	}
 void Tm1_BREWING::set_C_State(const int& _in1)			{ this->C_State = _in1; 			}
 

@@ -11,7 +11,8 @@ public:
 	var_PRESERVE(const T& value_);
   
 	//accessors
-	T get_value();
+	T    get_value();
+	bool get_locked();
   
 	//modifiers
 	bool set_value(const T& value_);
