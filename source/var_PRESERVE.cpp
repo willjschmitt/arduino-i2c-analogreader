@@ -101,5 +101,13 @@ template <class T> bool var_PRESERVE<T>::unlock(){
   return locked;
 }
 
+
+//helper operators
+template <class T> T  operator+ (const T& value1_, var_PRESERVE<T>& value2_){
+	return value1_ + value2_.get_value();
+}
+
 template class var_PRESERVE<int>;
 template class var_PRESERVE<double>;
+template double operator+  (const double& value1_, var_PRESERVE<double>& value2_);
+template int    operator+  (const int& value1_,    var_PRESERVE<int>& value2_);

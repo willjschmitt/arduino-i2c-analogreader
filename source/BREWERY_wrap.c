@@ -3301,6 +3301,19 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_get_Tm1_BREWING_1_timeleft_lock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)":get_Tm1_BREWING_1_timeleft_lock")) SWIG_fail;
+  result = (bool)get_Tm1_BREWING_1_timeleft_lock();
+  resultobj = SWIG_From_bool((bool)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_B_TempSet(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double *arg1 = 0 ;
@@ -3439,6 +3452,52 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_timeleft(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double *arg1 = 0 ;
+  double temp1 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:set_Tm1_BREWING_1_timeleft",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_Tm1_BREWING_1_timeleft" "', argument " "1"" of type '" "double""'");
+  } 
+  temp1 = (double)(val1);
+  arg1 = &temp1;
+  set_Tm1_BREWING_1_timeleft((double const &)*arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_set_Tm1_BREWING_1_timeleft_lock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  bool *arg1 = 0 ;
+  bool temp1 ;
+  bool val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:set_Tm1_BREWING_1_timeleft_lock",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_bool(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_Tm1_BREWING_1_timeleft_lock" "', argument " "1"" of type '" "bool""'");
+  } 
+  temp1 = (bool)(val1);
+  arg1 = &temp1;
+  set_Tm1_BREWING_1_timeleft_lock((bool const &)*arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"setup", _wrap_setup, METH_VARARGS, NULL},
@@ -3455,12 +3514,15 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"get_Tm1_BREWING_1_requestpermission", _wrap_get_Tm1_BREWING_1_requestpermission, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_C_State", _wrap_get_Tm1_BREWING_1_C_State, METH_VARARGS, NULL},
 	 { (char *)"get_Tm1_BREWING_1_timeleft", _wrap_get_Tm1_BREWING_1_timeleft, METH_VARARGS, NULL},
+	 { (char *)"get_Tm1_BREWING_1_timeleft_lock", _wrap_get_Tm1_BREWING_1_timeleft_lock, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_B_TempSet", _wrap_set_Tm1_BREWING_1_B_TempSet, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_B_TempSet_lock", _wrap_set_Tm1_BREWING_1_B_TempSet_lock, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_M_TempSet", _wrap_set_Tm1_BREWING_1_M_TempSet, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_M_TempSet_lock", _wrap_set_Tm1_BREWING_1_M_TempSet_lock, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_grantpermission", _wrap_set_Tm1_BREWING_1_grantpermission, METH_VARARGS, NULL},
 	 { (char *)"set_Tm1_BREWING_1_C_State", _wrap_set_Tm1_BREWING_1_C_State, METH_VARARGS, NULL},
+	 { (char *)"set_Tm1_BREWING_1_timeleft", _wrap_set_Tm1_BREWING_1_timeleft, METH_VARARGS, NULL},
+	 { (char *)"set_Tm1_BREWING_1_timeleft_lock", _wrap_set_Tm1_BREWING_1_timeleft_lock, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 

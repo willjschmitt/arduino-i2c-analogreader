@@ -40,3 +40,5 @@ public:
 	bool lock();
 	bool unlock();
 };
+
+template <typename T> T operator+  (const T& value1_, var_PRESERVE<T>& value2_);

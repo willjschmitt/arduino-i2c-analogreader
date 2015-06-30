@@ -35,6 +35,7 @@ public:
 	double  M_STRIKETEMP; //in degreesF
 	double  C_COOLTEMP; //in degreesF
 
+	var_PRESERVE <double> timer_time;
 	double  MASH_TIME;		//in seconds
 	double  BOIL_TIME;		//in seconds
 	double  MASHOUT_TIME;	//in seconds
@@ -80,6 +81,7 @@ public:
 	int    get_requestpermission();
 	int    get_C_State();
 	double get_timeleft();
+	bool   get_timeleft_lock();
 
 	//set functions
 	void set_B_TempSet(const double& _in1);
@@ -88,6 +90,8 @@ public:
 	void set_M_TempSet_lock(const bool& _in1);
 	void set_grantpermission(const int& _in1);
 	void set_C_State(const int& _in1);
+	void set_timeleft(const double& newtime);
+	void set_timeleft_lock(const bool& lock);
 };
 
 
