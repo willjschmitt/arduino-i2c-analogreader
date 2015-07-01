@@ -214,6 +214,7 @@ bool   get_Tm1_BREWING_1_M_TempSet_lock()   { return Tm1_BREWING_1->get_M_TempSe
 int    get_Tm1_BREWING_1_requestpermission(){ return Tm1_BREWING_1->get_requestpermission(); }
 int    get_Tm1_BREWING_1_C_State()		    { return Tm1_BREWING_1->get_C_State();           }
 double get_Tm1_BREWING_1_timeleft()		    { return Tm1_BREWING_1->get_timeleft();          }
+bool   get_Tm1_BREWING_1_timeleft_lock()    { return Tm1_BREWING_1->get_timeleft_lock();     }
 
 //set functions
 void set_Tm1_BREWING_1_B_TempSet(const double& _in1)    { Tm1_BREWING_1->set_B_TempSet(_in1);       }
@@ -222,3 +223,5 @@ void set_Tm1_BREWING_1_M_TempSet(const double& _in1)    { Tm1_BREWING_1->set_M_T
 void set_Tm1_BREWING_1_M_TempSet_lock(const bool& _in1) { Tm1_BREWING_1->set_M_TempSet_lock(_in1);  }
 void set_Tm1_BREWING_1_grantpermission(const int& _in1)	{ Tm1_BREWING_1->set_grantpermission(_in1); }
 void set_Tm1_BREWING_1_C_State(const int& _in1)			{ Tm1_BREWING_1->set_C_State(_in1);         }
+void set_Tm1_BREWING_1_timeleft(const double& newtime)  { Tm1_BREWING_1->set_timeleft(newtime);     }
+void set_Tm1_BREWING_1_timeleft_lock(const bool& lock)  { Tm1_BREWING_1->set_timeleft_lock(lock);   }

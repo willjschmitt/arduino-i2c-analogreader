@@ -11,6 +11,8 @@ from numpy import arange, sin, pi
 from matplotlib.figure import Figure
 import BREWERY
 
+import controls_gui
+
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
@@ -55,7 +57,7 @@ class BrewDynamicCanvas(BrewFigureCanvas):
         self.draw()
 
 class dataLabel(QtGui.QWidget):
-    def __init__(self, parent=None, labeltext="", unittext="", manualable=0, increaseaction="", decreaseaction="", lockaction=""):
+    def __init__(self, parent=None, labeltext="", unittext="", increaseaction="", decreaseaction="", entryaction="", lockaction=""):
         QtGui.QWidget.__init__(self)
         self.content = QtGui.QHBoxLayout(self)
         self.unittext = unittext
@@ -74,31 +76,39 @@ class dataLabel(QtGui.QWidget):
 
         #add the interactive content if speficied
         self.adjustor = QtGui.QVBoxLayout()
+        self.entry   = QtGui.QVBoxLayout()
         self.locker   = QtGui.QVBoxLayout()
-        if manualable==1:    
-            #adjuster knobs
-            if (increaseaction != ""):
-                self.upadjustor = QtGui.QPushButton("",self)
-                self.upadjustor.clicked.connect(increaseaction)
-                self.upadjustor.setIcon(KIcon('go-up'))
-                self.upadjustor.setIconSize(QtCore.QSize(15,15))
-                self.adjustor.addWidget(self.upadjustor)
-            if (decreaseaction != ""):
-                self.dnadjustor = QtGui.QPushButton("",self)
-                self.dnadjustor.clicked.connect(decreaseaction)
-                self.dnadjustor.setIcon(KIcon('go-down'))
-                self.dnadjustor.setIconSize(QtCore.QSize(15,15))
-                self.adjustor.addWidget(self.dnadjustor)
+        if (increaseaction != ""):
+            self.upadjustor = QtGui.QPushButton("",self)
+            self.upadjustor.clicked.connect(increaseaction)
+            self.upadjustor.setIcon(KIcon('go-up'))
+            self.upadjustor.setIconSize(QtCore.QSize(15,15))
+            self.adjustor.addWidget(self.upadjustor)
+        if (decreaseaction != ""):
+            self.dnadjustor = QtGui.QPushButton("",self)
+            self.dnadjustor.clicked.connect(decreaseaction)
+            self.dnadjustor.setIcon(KIcon('go-down'))
+            self.dnadjustor.setIconSize(QtCore.QSize(15,15))
+            self.adjustor.addWidget(self.dnadjustor)
             
-            #lock knobs
-            if (lockaction != ""):
-                self.locker_button = QtGui.QPushButton("",self)
-                self.locker_button.clicked.connect(lockaction)
-                self.locker_button.setIcon(QtGui.QIcon('img/unlocked.ico'))
-                self.locker_button.setIconSize(QtCore.QSize(45,45))
-                self.locker.addWidget(self.locker_button)
+        #manual entry actions   
+        if (entryaction !=""):
+            self.entry_button = QtGui.QPushButton("",self)
+            self.entry_button.clicked.connect(entryaction)
+            self.entry_button.setIcon(QtGui.QIcon('img/edit.ico'))
+            self.entry_button.setIconSize(QtCore.QSize(45,45))
+            self.entry.addWidget(self.entry_button)
+        
+        #lock knobs
+        if (lockaction != ""):
+            self.locker_button = QtGui.QPushButton("",self)
+            self.locker_button.clicked.connect(lockaction)
+            self.locker_button.setIcon(QtGui.QIcon('img/unlocked.ico'))
+            self.locker_button.setIconSize(QtCore.QSize(45,45))
+            self.locker.addWidget(self.locker_button)
             
         self.content.addLayout(self.adjustor)
+        self.content.addLayout(self.entry)
         self.content.addLayout(self.locker)
             
     def updateData(self, newvalue):
@@ -144,7 +154,7 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.toolbar.setIconSize(QtCore.QSize(50,50))
 
         settingsAction = QtGui.QAction(KIcon('preferences-system'), 'Settings', self)
-        settingsAction.triggered.connect(self.fileQuit)
+        settingsAction.triggered.connect(self.get_numpad)
         self.toolbar.addAction(settingsAction)
         self.toolbar.setIconSize(QtCore.QSize(50,50))
         
@@ -153,7 +163,6 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.permissionAction.setDisabled(True)
         self.toolbar.addAction(self.permissionAction)
         self.toolbar.setIconSize(QtCore.QSize(50,50))
-
 
 
         #===MAIN LAYOUT==========================================================
@@ -180,12 +189,12 @@ class BrewConnect_Window(QtGui.QMainWindow):
         self.graphs.addWidget(self.boiltempchart)
         self.graphs.addWidget(self.mashtempchart)
 
-        self.boiltemp_act = dataLabel(labeltext="Boil Temp:", unittext="degF", manualable=0)
-        self.boiltemp_set = dataLabel(labeltext="Boil SetPt:", unittext="degF", manualable=1, increaseaction=self.increase_B_TempSet, decreaseaction=self.decrease_B_TempSet, lockaction=self.locktoggle_B_TempSet)
-        self.mashtemp_act = dataLabel(labeltext="Mash Temp:", unittext="degF", manualable=0)
-        self.mashtemp_set = dataLabel(labeltext="Mash SetPt:", unittext="degF", manualable=1, increaseaction=self.increase_M_TempSet, decreaseaction=self.decrease_M_TempSet, lockaction=self.locktoggle_M_TempSet)
-        self.controlstate = dataLabel(labeltext="CTRL State:", unittext="", manualable=1, increaseaction=self.increase_C_State, decreaseaction=self.decrease_C_State)
-        self.timeleft_lab = dataLabel(labeltext="Time Left:",  unittext="min", manualable=0)
+        self.boiltemp_act = dataLabel(labeltext="Boil Temp:", unittext="degF")
+        self.boiltemp_set = dataLabel(labeltext="Boil SetPt:", unittext="degF", increaseaction=self.increase_B_TempSet, decreaseaction=self.decrease_B_TempSet, lockaction=self.locktoggle_B_TempSet)
+        self.mashtemp_act = dataLabel(labeltext="Mash Temp:", unittext="degF")
+        self.mashtemp_set = dataLabel(labeltext="Mash SetPt:", unittext="degF", increaseaction=self.increase_M_TempSet, decreaseaction=self.decrease_M_TempSet, lockaction=self.locktoggle_M_TempSet)
+        self.controlstate = dataLabel(labeltext="CTRL State:", unittext="", increaseaction=self.increase_C_State, decreaseaction=self.decrease_C_State)
+        self.timeleft_lab = dataLabel(labeltext="Time Left:",  unittext="min", entryaction=self.enter_timeleft, lockaction = self.locktoggle_timeleft)
         self.datavals.addWidget(self.boiltemp_act)
         self.datavals.addWidget(self.boiltemp_set)
         self.datavals.addWidget(self.mashtemp_act)
@@ -345,6 +354,16 @@ class BrewConnect_Window(QtGui.QMainWindow):
 
     def decrease_C_State(self):
         BREWERY.set_Tm1_BREWING_1_C_State(BREWERY.get_Tm1_BREWING_1_C_State() - 1)
+        
+    def enter_timeleft(self):
+        try:
+            value = self.get_numpad()
+            BREWERY.set_Tm1_BREWING_1_timeleft(value)
+        except Exception as e:
+            return
+    
+    def locktoggle_timeleft(self):
+        BREWERY.set_Tm1_BREWING_1_timeleft_lock(1 - BREWERY.get_Tm1_BREWING_1_timeleft_lock())
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Message',
@@ -355,7 +374,16 @@ class BrewConnect_Window(QtGui.QMainWindow):
             event.accept()
             self.fileQuit()
         else:
-            event.ignore()        
+            event.ignore()    
+            
+    def get_numpad(self):
+        dlg = controls_gui.numpad()
+        if dlg.exec_():
+            values = dlg.getValues()
+            return values
+            # Do stuff with values
+        
+        raise Exception("Input Cancelled")
 
         
 def main():
