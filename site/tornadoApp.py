@@ -23,11 +23,6 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
-def make_app():
-    return tornado.web.Application([
-        (r"/", MainHandler),
-    ])
-
 settings = {
     "ui_modules":uimodules
 }
