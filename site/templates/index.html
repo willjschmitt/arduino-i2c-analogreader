@@ -19,12 +19,11 @@
 
 		<!-- Documentation Prettify -->
 		<link href="{{ static_url("vendor/google-code-prettify/prettify-tomorrow.css") }}" rel="stylesheet" />
-
+		
 		<!-- Dashboard Level NVD3 Charts -->
 		<script src="{{ static_url("vendor/d3/d3.v3.js") }}" charset="utf-8"></script>
 		<script src="{{ static_url("vendor/nvd3/nv.d3.js") }}" type="text/javascript"></script>
 		<link href="{{ static_url("vendor/nvd3/nv.d3.css") }}" rel="stylesheet">
-		<script src="{{ static_url("js/temperature.js") }}" type='text/javascript'> </script>
 	</head>
 
 	<body class="dark-sidebar dark-header-brand container-fluid">
@@ -207,15 +206,6 @@
 								<div class="panel panel-default">
 									<div class="panel-heading">
 										<header>Heating Element Status</header>
-
-										<div class="panel-heading-tools">
-											<div class="btn-group">
-												<a class="btn btn-icon-toggle panel-tools-menu dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons">more_vert</i></a>
-												<ul class="dropdown-menu dropdown-menu-right">
-													<li><a href="#">Refresh</a></li>
-												</ul>
-											</div>
-										</div>
 									</div>
 									<div class="panel-body no-top-padding">
 										<div class="layout layout-align-center-vertical">
@@ -326,5 +316,7 @@
 
 		<script src="{{ static_url("js/bemat-admin-demo-chartist.min.js") }}"></script>
 		<script src="{{ static_url("js/bemat-admin-demo-dashboard.min.js") }}"></script>
+		
+		<script src="{{ static_url("js/temperature.js") }}" type='text/javascript'> </script>
 	</body>
 </html>

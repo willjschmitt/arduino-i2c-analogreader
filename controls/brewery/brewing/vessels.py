@@ -11,6 +11,9 @@ from measurement import rtdSensor
 
 from dsp import regulator
 
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+
 class simpleVessel(object):
     '''
     classdocs
