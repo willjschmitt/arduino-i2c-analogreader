@@ -1,7 +1,9 @@
-$(document).ready(function(){
+angular.module('app', [])
+
+.controller('dashboardController',function($scope){
 	var dataPoints = [],
 		chart;
-	
+
 	dataPoints.push({'key':'Boil Actual','values':[]});
 	dataPoints.push({'key':'Boil Set Point','values':[]});
 	var dataPointsMap = {
