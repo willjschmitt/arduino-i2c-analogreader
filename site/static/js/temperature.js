@@ -52,9 +52,7 @@ $(document).ready(function(){
 	        //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
 	        for (var i = 0; i < response.dataPoints.length; i++) {
 	        	var dataPoint = response.dataPoints[i];
-	        	console.log(dataPoint)
-	        	dataPoints[dataPointsMap[this.sensor]].values.push([new Date(dataPoint.time),dataPoint.value])
-	        	console.log(dataPoints[dataPointsMap[this.sensor]].values);
+	        	dataPoints[dataPointsMap[this.sensor]].values.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
 	        }
 	        updateChart();
 	    };
@@ -81,9 +79,35 @@ $(document).ready(function(){
 		d3.select('#chart svg')
 			.datum(dataPoints)
 			.call(chart);
-
+		
 		//TODO: Figure out a good way to do this automatically
 		nv.utils.windowResize(chart.update);
+		
+		//calculate min/max in current dataset
+		var min = _.reduce(dataPoints,function(currentMin,dataPointArray){
+			var min = _.reduce(dataPointArray.values,function(currentMin,dataPoint){
+				return Math.min(dataPoint[1],currentMin);
+			},Infinity);
+			return Math.min(min,currentMin);
+		},Infinity);
+		var max = _.reduce(dataPoints,function(currentMax,dataPointArray){
+			var max = _.reduce(dataPointArray.values,function(currentMax,dataPoint){
+				return Math.max(dataPoint[1],currentMax);
+			},Infinity);
+			return Math.max(min,currentMax);
+		},-Infinity);
+		
+		//make sure we have a spread
+		var minSpread = 10.;
+		if ((max-min) < minSpread){
+			var spreadAdjust = (minSpread-(max-min))*.5;
+			max+= spreadAdjust;
+			max-= spreadAdjust;
+		}
+		
+		//update min/max
+		//TODO: I don't know why nvd3 messes up sometimes, but we had to force calculat this
+		chart.forceY([min,max]);
 
 		return chart;
 	}
