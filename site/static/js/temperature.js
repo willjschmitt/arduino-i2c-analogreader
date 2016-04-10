@@ -10,9 +10,13 @@ $(document).ready(function(){
 	}
 	
 	function postNew(){
-		$.post("/live/timeseries/new/", function(response) {
-	        window.setTimeout(postNew,1000);
-	    });		
+		var newDataPoint = {
+			time:new Date().toISOString(),
+			value:Math.random(),
+			sensor:1
+		};
+		$.post("/live/timeseries/new/", newDataPoint)
+			.done(function(response) {window.setTimeout(postNew,1000);});
 	}
 	postNew();
 
@@ -49,7 +53,7 @@ $(document).ready(function(){
 	        //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
 	        for (var i = 0; i < response.dataPoints.length; i++) {
 	        	var dataPoint = response.dataPoints[i]
-	        	dataPoints[0].values.push([dataPoint.time,dataPoint.value])
+	        	dataPoints[0].values.push([new Date(dataPoint.time),dataPoint.value])
 	        }
 	        updateChart();
 	    }
@@ -64,7 +68,7 @@ $(document).ready(function(){
 		.useInteractiveGuideline(true);
 	chart.xAxis
 		.tickFormat(function(d) {
-			return d3.time.format('%H:%M')(new Date(d*1000.))
+			return d3.time.format('%H:%M')(new Date(d))
 		});
 	chart.yAxis
 		.tickFormat(d3.format(',.1f'));

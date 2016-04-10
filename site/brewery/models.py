@@ -28,5 +28,5 @@ class TimeSeriesDataPoint(models.Model):
     sensor = models.ForeignKey(AssetSensor)
     recipe_instance = models.ForeignKey(RecipeInstance)
     
-    time = models.TimeField()
+    time = models.DateTimeField()
     value = models.FloatField()

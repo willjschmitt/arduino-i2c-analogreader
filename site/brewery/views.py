@@ -8,7 +8,14 @@ from tornado import gen
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from models import Brewery
+from models import Asset,AssetSensor
+from models import Recipe,RecipeInstance
+from models import TimeSeriesDataPoint
+
+from django.db.models import ForeignKey
 
 import logging
 import random
@@ -35,7 +42,7 @@ class TimeSeriesBuffer(object):
         if cursor:
             new_count = 0
             for msg in reversed(self.cache):
-                if msg["id"] == cursor:
+                if msg["id"] == int(cursor):
                     break
                 new_count += 1
             if new_count:
@@ -64,12 +71,25 @@ global_timeseries_buffer = TimeSeriesBuffer()
 class TimeSeriesNewHandler(tornado.web.RequestHandler):
     def post(self):
         newDataPoint = {
-            'id': str(uuid.uuid4()),
-            'sensor': 1,
-            'time': time.time(),
-            'value':random.random(),
+            #'id': str(uuid.uuid4()),
+            'recipe_instance': RecipeInstance.objects.get(pk=1),
+            'sensor': AssetSensor.objects.get(pk=1),
+            'time': self.get_body_argument("time", default=None, strip=False),
+            'value':self.get_body_argument("value", default=None, strip=False),
         }
-        global_timeseries_buffer.new_dataPoints([newDataPoint])
+        TimeSeriesDataPoint(**newDataPoint).save()
+
+@receiver(post_save, sender=TimeSeriesDataPoint)
+def my_handler(sender, instance, **kwargs):
+    fields = ('id','recipe_instance','sensor','time','value',)
+    newDataPoint = {}
+    for fieldName in fields:
+        field = instance._meta.get_field(fieldName)
+        if isinstance(field, ForeignKey):
+            newDataPoint[fieldName] = getattr(instance,fieldName).pk
+        else:
+            newDataPoint[fieldName] = getattr(instance,fieldName)
+    global_timeseries_buffer.new_dataPoints([newDataPoint])
 
 class TimeSeriesSubscribeHandler(tornado.web.RequestHandler):
     @gen.coroutine
