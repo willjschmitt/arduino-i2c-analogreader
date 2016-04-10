@@ -18,7 +18,7 @@ $(document).ready(function(){
 		$.post("/live/timeseries/new/", newDataPoint)
 			.done(function(response) {window.setTimeout(postNew,1000);});
 	}
-	postNew();
+	//postNew();
 
 	var updater = {
 	    errorSleepTime: 500,

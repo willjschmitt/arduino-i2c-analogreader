@@ -77,6 +77,7 @@ class TimeSeriesNewHandler(tornado.web.RequestHandler):
             'time': self.get_body_argument("time", default=None, strip=False),
             'value':self.get_body_argument("value", default=None, strip=False),
         }
+        print newDataPoint
         TimeSeriesDataPoint(**newDataPoint).save()
 
 @receiver(post_save, sender=TimeSeriesDataPoint)

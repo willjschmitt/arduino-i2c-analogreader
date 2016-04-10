@@ -7,12 +7,9 @@ from datetime import time
 
 from gpiocrust import OutputPin
 
-from measurement import rtdSensor
+from controls.measurement import rtdSensor
 
-from dsp import regulator
-
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
+from controls.dsp import regulator
 
 class simpleVessel(object):
     '''
