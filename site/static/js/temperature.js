@@ -46,7 +46,7 @@ $(document).ready(function(){
 	        if (!response.dataPoints) return;
 	        updater.cursor = response.cursor;
 	        updater.cursor = response.dataPoints[response.dataPoints.length - 1].id;
-	        console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
+	        //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
 	        for (var i = 0; i < response.dataPoints.length; i++) {
 	        	var dataPoint = response.dataPoints[i]
 	        	dataPoints[0].values.push([dataPoint.time,dataPoint.value])
@@ -63,9 +63,8 @@ $(document).ready(function(){
 		.color(d3.scale.category10().range())
 		.useInteractiveGuideline(true);
 	chart.xAxis
-		//.tickValues([1078030800000,1122782400000,1167541200000,1251691200000])
 		.tickFormat(function(d) {
-			return d3.time.format('%x')(new Date(d))
+			return d3.time.format('%H:%M')(new Date(d*1000.))
 		});
 	chart.yAxis
 		.tickFormat(d3.format(',.1f'));
