@@ -3,63 +3,67 @@ $(document).ready(function(){
 		chart;
 	
 	dataPoints.push({'key':'Boil Actual','values':[]});
+	dataPoints.push({'key':'Boil Set Point','values':[]});
+	var dataPointsMap = {
+		1:0,
+		2:1
+	};
 	
 	function getCookie(name) {
 	    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
 	    return r ? r[1] : undefined;
 	}
-	
-	function postNew(){
-		var newDataPoint = {
-			time:new Date().toISOString(),
-			value:Math.random(),
-			sensor:1
-		};
-		$.post("/live/timeseries/new/", newDataPoint)
-			.done(function(response) {window.setTimeout(postNew,1000);});
-	}
-	//postNew();
 
-	var updater = {
-	    errorSleepTime: 500,
-	    cursor: null,
+	var updaterClass = function(recipe_instance,sensor){
+		this.errorSleepTime = 500;
+		this.cursor = null;
+		
+		this.recipe_instance = recipe_instance;
+		this.sensor = sensor;
 
-	    poll: function() {
+		this.poll =  function() {
 	        var args = {"_xsrf": getCookie("_xsrf")};
-	        if (updater.cursor) args.cursor = updater.cursor;
+	        if (this.cursor) args.cursor = this.cursor;
+	        args.recipe_instance = recipe_instance;
+	        args.sensor = sensor;
 	        $.ajax({url: "/live/timeseries/subscribe/", type: "POST", dataType: "text",
-	        	data: $.param(args), success: updater.onSuccess,
-	        	error: updater.onError
+	        	data: $.param(args), success: this.onSuccess,
+	        	error: this.onError
 	        });
-	    },
+	    }.bind(this);
 
-	    onSuccess: function(response) {
-	        try {updater.newData(eval("(" + response + ")"));}
-	        catch (e) {updater.onError();return;}
-	        updater.errorSleepTime = 500;
-	        window.setTimeout(updater.poll, 0);
-	    },
+	    this.onSuccess = function(response) {
+	        try {this.newData(eval("(" + response + ")"));}
+	        catch (e) {this.onError();return;}
+	        this.errorSleepTime = 500;
+	        window.setTimeout(this.poll, 0);
+	    }.bind(this);
 
-	    onError: function(response) {
-	        updater.errorSleepTime *= 2;
-	        console.log("Poll error; sleeping for", updater.errorSleepTime, "ms");
-	        window.setTimeout(updater.poll, updater.errorSleepTime);
-	    },
+	    this.onError = function(response) {
+	        this.errorSleepTime *= 2;
+	        console.log("Poll error; sleeping for", this.errorSleepTime, "ms");
+	        window.setTimeout(this.poll, this.errorSleepTime);
+	    }.bind(this);
 
-	    newData: function(response) {
+	    this.newData = function(response) {
 	        if (!response.dataPoints) return;
-	        updater.cursor = response.cursor;
-	        updater.cursor = response.dataPoints[response.dataPoints.length - 1].id;
+	        this.cursor = response.cursor;
+	        this.cursor = response.dataPoints[response.dataPoints.length - 1].id;
 	        //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
 	        for (var i = 0; i < response.dataPoints.length; i++) {
-	        	var dataPoint = response.dataPoints[i]
-	        	dataPoints[0].values.push([new Date(dataPoint.time),dataPoint.value])
+	        	var dataPoint = response.dataPoints[i];
+	        	console.log(dataPoint)
+	        	dataPoints[dataPointsMap[this.sensor]].values.push([new Date(dataPoint.time),dataPoint.value])
+	        	console.log(dataPoints[dataPointsMap[this.sensor]].values);
 	        }
 	        updateChart();
-	    }
-	};
+	    };
+	}
 	
-	updater.poll();
+	boilTemperatureActual = new updaterClass(1,1);
+	boilTemperatureSetPoint = new updaterClass(1,2);
+	boilTemperatureActual.poll();
+	boilTemperatureSetPoint.poll();
 	
 	chart = nv.models.lineChart()
 		.x(function(d) { return d[0] })

@@ -66,18 +66,33 @@ class TimeSeriesBuffer(object):
             self.cache = self.cache[-self.cache_size:]
 
 # Making this a non-singleton is left as an exercise for the reader.
-global_timeseries_buffer = TimeSeriesBuffer()
+global_timeseries_buffer = {}
+def get_timeseries_buffer(*args):    
+    # iterate through arguments as a nest of buffer dicts
+    timeseries_buffer = global_timeseries_buffer
+    for arg in args[:-1]:
+        #create the buffer if it doesnt exist
+        if arg not in timeseries_buffer:
+            timeseries_buffer[arg] = {}
+        timeseries_buffer = timeseries_buffer[arg]
+    # the last element should now be an actual buffer
+    if args[-1] not in timeseries_buffer:
+        logging.info('Creating new buffer for {0}'.format(args))
+        timeseries_buffer[args[-1]] = TimeSeriesBuffer()
+    timeseries_buffer = timeseries_buffer[args[-1]]
+    
+    return timeseries_buffer
 
 class TimeSeriesNewHandler(tornado.web.RequestHandler):
     def post(self):
-        newDataPoint = {
-            #'id': str(uuid.uuid4()),
-            'recipe_instance': RecipeInstance.objects.get(pk=1),
-            'sensor': AssetSensor.objects.get(pk=1),
-            'time': self.get_body_argument("time", default=None, strip=False),
-            'value':self.get_body_argument("value", default=None, strip=False),
-        }
-        print newDataPoint
+        fields = ('recipe_instance','sensor','time','value',)
+        newDataPoint = {}
+        for fieldName in fields:
+            field = TimeSeriesDataPoint._meta.get_field(fieldName)
+            if field.is_relation:
+                newDataPoint[fieldName] = field.related_model.objects.get(pk=self.get_argument(fieldName))
+            else:
+                newDataPoint[fieldName] = self.get_body_argument(fieldName)
         TimeSeriesDataPoint(**newDataPoint).save()
 
 @receiver(post_save, sender=TimeSeriesDataPoint)
@@ -90,19 +105,28 @@ def my_handler(sender, instance, **kwargs):
             newDataPoint[fieldName] = getattr(instance,fieldName).pk
         else:
             newDataPoint[fieldName] = getattr(instance,fieldName)
-    global_timeseries_buffer.new_dataPoints([newDataPoint])
+    buffer_instance = get_timeseries_buffer(instance.recipe_instance.pk,instance.sensor.pk)
+    logging.info("Posting to {0} : {1},{2}".format(buffer_instance,instance.recipe_instance.pk,instance.sensor.pk))
+    buffer_instance.new_dataPoints([newDataPoint])
 
 class TimeSeriesSubscribeHandler(tornado.web.RequestHandler):
     @gen.coroutine
     def post(self):
         cursor = self.get_argument("cursor", None)
+        
+        #information about what we are subscribing to
+        self.recipe_instance = long(self.get_body_argument("recipe_instance", None))
+        self.sensor = long(self.get_body_argument("sensor", None))        
+        self.buffer_instance = get_timeseries_buffer(self.recipe_instance,self.sensor)
+        logging.info("Subscribing to {0} : {1},{2}".format(self.buffer_instance,self.recipe_instance,self.sensor))
+        
         # Save the future returned by wait_for_messages so we can cancel
         # it in wait_for_messages
-        self.future = global_timeseries_buffer.wait_for_data(cursor=cursor)
+        self.future = self.buffer_instance.wait_for_data(cursor=cursor)
         dataPoints = yield self.future
         if self.request.connection.stream.closed():
             return
         self.write(dict(dataPoints=dataPoints))
 
     def on_connection_close(self):
-        global_timeseries_buffer.cancel_wait(self.future)
+        self.buffer_instance.cancel_wait(self.future)

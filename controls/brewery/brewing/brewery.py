@@ -93,14 +93,21 @@ class brewery(object):
         #post temperature updates to server
         import requests
         import json
-        newDataPoint = {
-            'time':str(datetime.datetime.now()),
-            'value':self.boilKettle.temperature,
-            'sensor':1
-        }
-        print newDataPoint
-        response = requests.post("http://localhost:8888/live/timeseries/new/", data=newDataPoint)
-        print response.text
+        
+        sampleTime = str(datetime.datetime.now())
+        recipeInstance = 1
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.boilKettle.temperature,'sensor':1
+            }
+        )
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.boilKettle.temperatureSetPoint,'sensor':2
+            }
+        )
         
         #schedule next task 1 event
         self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
