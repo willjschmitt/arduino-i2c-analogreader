@@ -90,6 +90,12 @@ class brewery(object):
         # Controls Calculations for Boil Kettle Element
         self.boilKettle.regulate()
         
+        self.postData()
+        
+        #schedule next task 1 event
+        self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
+        
+    def postData(self):
         #post temperature updates to server
         import requests
         import json
@@ -109,8 +115,31 @@ class brewery(object):
             }
         )
         
-        #schedule next task 1 event
-        self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.mashTun.temperature,'sensor':3
+            }
+        )
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.mashTun.temperatureSetPoint,'sensor':4
+            }
+        )
+        
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.boilKettle.dutyCycle,'sensor':5
+            }
+        )
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'sensor':6
+            }
+        )
         
     def statePrestart(self):
         '''

@@ -112,7 +112,7 @@
 												<div class="mini-card mini-card-primary">
 													<div class="mini-card-left">
 														<span>Power Usage</span>
-														<h2>1.2kW</h2>
+														<h2>{{ "{{" }} boilKettlePower.latest/1000. | number : 1}}kW</h2>
 													</div>
 													<div class="mini-card-right">
 														<div class="bemat-mini-chart bemat-mini-chart-primary">
@@ -150,7 +150,7 @@
 												<div class="mini-card mini-card-primary">
 													<div class="mini-card-left">
 														<span>Boil Kettle Temperature</span>
-														<h2>169.1&deg;F (170.0&deg;F)</h2>
+														<h2>{{ "{{" }} boilTemperatureActual.latest | number : 1}}&deg;F ({{ "{{" }} boilTemperatureSetPoint.latest | number: 1 }}&deg;F)</h2>
 													</div>
 													<div class="mini-card-right">
 														<div class="bemat-mini-chart bemat-mini-chart-primary">
@@ -169,7 +169,7 @@
 												<div class="mini-card mini-card-warning">
 													<div class="mini-card-left">
 														<span>Mash Tun Temperatuer</span>
-														<h2>158.4&deg;F (160.0&deg;F)</h2>
+														<h2>{{ "{{" }} mashTemperatureActual.latest | number : 1}}&deg;F ({{ "{{" }} mashTemperatureSetPoint.latest | number: 1 }}&deg;F)</h2>
 													</div>
 													<div class="mini-card-right">
 														<div class="bemat-mini-chart bemat-mini-chart-primary">
@@ -189,7 +189,7 @@
 									</div>
 									<div class="panel-body no-top-padding">
 										<div class="layout layout-align-center-vertical">
-											<div class="bemat-pie-chart-live-update height-5" data-toggle="simple-pie-chart" data-percent="14"  data-size="250" data-type="primary"></div>
+											<div id="dutycycledial" class="bemat-pie-chart height-5" data-toggle="simple-pie-chart" data-percent="0"  data-size="250" data-type="primary"></div>
 										</div>
 										
 									</div>
