@@ -131,7 +131,7 @@
 												<div class="mini-card mini-card-primary">
 													<div class="mini-card-left">
 														<span>Energy Consumption</span>
-														<h2>5.695kWh ($2.14)</h2>
+														<h2>{{ "{{" }} systemEnergy.latest | number : 1}}Wh ({{ "{{" }} systemEnergyCost.latest | currency : "$"}})</h2>
 													</div>
 													<div class="mini-card-right">
 														<div class="bemat-mini-chart bemat-mini-chart-primary">

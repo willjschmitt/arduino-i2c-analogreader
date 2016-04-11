@@ -61,6 +61,9 @@ class brewery(object):
         self.mashoutTime = 10.*60. # in seconds
         self.boilTemperature = 217.
         self.coolTemperature = 70.
+        
+        self.systemEnergy = 0.
+        self.energyUnitCost = 0.15 #$/kWh
     
         #permission variables
         self.requestPermission = False
@@ -68,6 +71,7 @@ class brewery(object):
         
         #schedule task 1 execution
         self.tm1Rate = 1. #seconds
+        self.tm1_tz1 = time.time() 
         self.task00()
         
         self.scheduler.run()
@@ -89,10 +93,14 @@ class brewery(object):
     
         # Controls Calculations for Boil Kettle Element
         self.boilKettle.regulate()
+
+        self.systemEnergy += (self.boilKettle.dutyCycle*self.boilKettle.rating)*((self.wtime-self.tm1_tz1)/(60.*60.))
+        self.systemEnergyCost= self.systemEnergy/1000. * self.energyUnitCost
         
         self.postData()
         
         #schedule next task 1 event
+        self.tm1_tz1 = self.wtime
         self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
         
     def postData(self):
@@ -138,6 +146,19 @@ class brewery(object):
             data={
                 'time':sampleTime,'recipe_instance':1,
                 'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'sensor':6
+            }
+        )
+        
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.systemEnergy,'sensor':7
+            }
+        )
+        requests.post("http://localhost:8888/live/timeseries/new/",
+            data={
+                'time':sampleTime,'recipe_instance':1,
+                'value':self.systemEnergyCost, 'sensor':8
             }
         )
         

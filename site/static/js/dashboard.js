@@ -65,6 +65,8 @@ angular.module('app', [])
 	var noLineDataPointsMap = [
 	    'boilKettleDutyCycle',
 	    'boilKettlePower',
+	    'systemEnergy',
+	    'systemEnergyCost',	    
 	]
 	
 	function getCookie(name) {
@@ -94,6 +96,12 @@ angular.module('app', [])
 	
 	$scope.boilKettlePower = new timeSeriesUpdater(1,6);
 	$scope.boilKettlePower.poll();
+	
+	$scope.systemEnergy = new timeSeriesUpdater(1,7);
+	$scope.systemEnergy.poll();
+	
+	$scope.systemEnergyCost = new timeSeriesUpdater(1,8);
+	$scope.systemEnergyCost.poll();
 	
 	//TODO: don't know why the timeSeriesUpdater change isn't propogating unless I touch it? I really should be having to do a time check...
 	function checkLatest(){
