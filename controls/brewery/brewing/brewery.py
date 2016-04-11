@@ -28,6 +28,9 @@ class brewery(object):
         logging.info('Initializing Brewery object')
         self.scheduler = sched.scheduler(time.time,time.sleep)
         
+        self.dataService = "http://localhost:8888/live/timeseries/new/"
+        self.recipeInstance = 1
+        
         #state machine initialization
         self.state = stateMachine(self)
         self.state.addState(self.statePrestart)
@@ -109,55 +112,55 @@ class brewery(object):
         import json
         
         sampleTime = str(datetime.datetime.now())
-        recipeInstance = 1
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.boilKettle.temperature,'sensor':1
             }
         )
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.boilKettle.temperatureSetPoint,'sensor':2
             }
         )
         
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.mashTun.temperature,'sensor':3
             }
         )
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.mashTun.temperatureSetPoint,'sensor':4
             }
         )
         
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.boilKettle.dutyCycle,'sensor':5
             }
         )
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'sensor':6
             }
         )
         
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.systemEnergy,'sensor':7
             }
         )
-        requests.post("http://localhost:8888/live/timeseries/new/",
+        requests.post(self.dataService,
             data={
-                'time':sampleTime,'recipe_instance':1,
+                'time':sampleTime,'recipe_instance':self.recipeInstance,
                 'value':self.systemEnergyCost, 'sensor':8
             }
         )
