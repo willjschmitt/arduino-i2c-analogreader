@@ -108,7 +108,6 @@ angular.module('app', [])
 		try{
 			for (var i =0; i < $scope.dataPoints.length; i++)$scope.dataPoints[i].values = $scope[dataPointsMap[i].name].dataPoints;
 			updateChart();
-			for (lineName in noLineDataPointsMap) $scope[lineName].latest = $scope[lineName].latest;
 		}catch(e){}
 		
 		$("#dutycycledial").simplePieChart("set",$scope.boilKettleDutyCycle.latest*100.);
