@@ -61,14 +61,7 @@ angular.module('app', [])
 		2:{name: 'mashTemperatureActual'},
 		3:{name: 'mashTemperatureSetPoint'},
 	}
-	
-	var noLineDataPointsMap = [
-	    'boilKettleDutyCycle',
-	    'boilKettlePower',
-	    'systemEnergy',
-	    'systemEnergyCost',	    
-	]
-	
+
 	function getCookie(name) {
 	    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
 	    return r ? r[1] : undefined;
