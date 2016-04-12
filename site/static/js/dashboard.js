@@ -8,46 +8,46 @@ angular.module('app', [])
 		this.cursor = null;
 		
 		this.dataPoints = [];
-	
-		//TODO: bind(this) feels wrong... investiate why I need to do this for all the functions.. might be from the ajax calling?
-		this.poll =  function() {
-	        var args = {};//{"_xsrf": getCookie("_xsrf")};
-	        if (this.cursor) args.cursor = this.cursor;
-	        args.recipe_instance = this.recipe_instance;
-	        args.sensor = this.sensor;
-	        $.ajax({url: "/live/timeseries/subscribe/", type: "POST", dataType: "text",
-	        	data: $.param(args), success: this.onSuccess,
-	        	error: this.onError
-	        });
-	    }.bind(this);
-	
-	    this.onSuccess = function(response) {
-	        //try {
-	        	this.newData(eval("(" + response + ")"));
-	        //}
-	        //catch (e) {this.onError();return;}
-	        this.errorSleepTime = 500;
-	        window.setTimeout(this.poll, 0);
-	    }.bind(this);
-	
-	    this.onError = function(response) {
-	    	this.errorSleepTime *= 2;
-	        console.log("Poll error; sleeping for", this.errorSleepTime, "ms");
-	        window.setTimeout(this.poll, this.errorSleepTime);
-	    }.bind(this);
-	
-	    this.newData = function(response) {
-	        if (!response.dataPoints) return;
-	        this.cursor = response.cursor;
-	        this.cursor = response.dataPoints[response.dataPoints.length - 1].id;
-	        //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
-	        for (var i = 0; i < response.dataPoints.length; i++) {
-	        	var dataPoint = response.dataPoints[i];
-	        	this.dataPoints.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
-	        	this.latest = parseFloat(dataPoint.value);
-	        }
-	    }.bind(this);
 	}
+	
+	service.prototype.poll =  function() {
+        var args = {};//{"_xsrf": getCookie("_xsrf")};
+        if (this.cursor) args.cursor = this.cursor;
+        args.recipe_instance = this.recipe_instance;
+        args.sensor = this.sensor;
+        var self = this;
+        $.ajax({url: "/live/timeseries/subscribe/", type: "POST", dataType: "text",
+        	data: $.param(args), success: this.onSuccess.bind(self),
+        	error: this.onError.bind(self)
+        });
+    };
+    
+    service.prototype.onSuccess = function(response) {
+        try {this.newData(eval("(" + response + ")"));}
+        catch (e) {this.onError();return;}
+        this.errorSleepTime = 500;
+        var self = this;
+        window.setTimeout(this.poll.bind(self), 0);
+    };
+    
+    service.prototype.onError = function(response) {
+    	this.errorSleepTime *= 2;
+        console.log("Poll error; sleeping for", this.errorSleepTime, "ms");
+        var self = this;
+        window.setTimeout(this.poll.bind(self), this.errorSleepTime);
+    };
+
+	service.prototype.newData = function(response) {
+	    if (!response.dataPoints) return;
+	    this.cursor = response.cursor;
+	    this.cursor = response.dataPoints[response.dataPoints.length - 1].id;
+	    //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
+	    for (var i = 0; i < response.dataPoints.length; i++) {
+	    	var dataPoint = response.dataPoints[i];
+	    	this.dataPoints.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
+	    	this.latest = parseFloat(dataPoint.value);
+	    }
+	};
     
     return service;
 })
