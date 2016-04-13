@@ -51,8 +51,8 @@ angular.module('app', [])
     
     return service;
 })
-.controller('dashboardController',['$scope','$timeout','timeSeriesUpdater',function($scope,$timeout,timeSeriesUpdater){
-	$scope.dataPoints = []
+.controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
+	$scope.dataPoints = [];
 	$scope.chart = null;
 	
 	var dataPointsMap = {
@@ -65,8 +65,8 @@ angular.module('app', [])
 	function getCookie(name) {
 	    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
 	    return r ? r[1] : undefined;
-	}
-
+	}	
+	
 	//create new subscription services for the time series data
 	$scope.boilTemperatureActual = new timeSeriesUpdater(1,1);
 	$scope.dataPoints.push({'key':'Boil Actual',values:$scope.boilTemperatureActual.dataPoints});
@@ -97,12 +97,9 @@ angular.module('app', [])
 	$scope.systemEnergyCost.poll();
 	
 	//TODO: don't know why the timeSeriesUpdater change isn't propogating unless I touch it? I really should be having to do a time check...
-	function checkLatest(){
-		try{
-			for (var i =0; i < $scope.dataPoints.length; i++)$scope.dataPoints[i].values = $scope[dataPointsMap[i].name].dataPoints;
-			updateChart();
-		}catch(e){}
-		
+	$interval(updateChart,1000.);
+	
+	$interval(function(){
 		$("#dutycycledial").simplePieChart("set",$scope.boilKettleDutyCycle.latest*100.);
 		var colorClasses = {
 			'cc-spc-primary':{min:0.,max:0.0},
@@ -116,14 +113,7 @@ angular.module('app', [])
 			if ($scope.boilKettleDutyCycle.latest > details.min && $scope.boilKettleDutyCycle.latest <= details.max)
 				$("#dutycycledial").addClass(name);
 		});
-		
-		$timeout(checkLatest,1000.);
-	}
-	checkLatest();
-	
-	
-	
-	
+	},500.);
 	
 	$scope.chart = nv.models.lineChart()
 		.x(function(d) { return d[0] })
@@ -139,7 +129,8 @@ angular.module('app', [])
 	
 	function updateChart(){
 		d3.select('#chart svg')
-			.datum($scope.dataPoints)
+		    //TODO: I shouldnt need to do a deep copy. nvd3 seems to screw around with the references in $scope.dataPoints otherwise and it becomes detached from the service (I think its from a map call that sets to itself)
+			.datum(angular.copy($scope.dataPoints))
 			.call($scope.chart);
 		
 		//TODO: Figure out a good way to do this automatically
@@ -173,6 +164,5 @@ angular.module('app', [])
 
 		return $scope.chart;
 	}
-	nv.addGraph(updateChart);
-	
+	nv.addGraph(updateChart);	
 }]);
