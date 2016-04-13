@@ -200,37 +200,10 @@
 
 						<div class="row">
 							<div class="col-lg-3 col-sm-6">
-								<div class="panel panel-default">
-									<div class="panel-heading">
-										<header>Heating Element Status</header>
-									</div>
-									<div class="panel-body no-top-padding">
-										<div class="layout layout-align-center-vertical">
-											<button type="button" class="btn btn-lg" ng-class="heatingElementStatus.latest ? 'btn-danger' : 'btn-info'" ng-attr-data-toggle="heatingElementStatus.latest" ng-click="toggleHeatingElementStatus()">
-												{{"{{"}}	 heatingElementStatus.latest ? "ON" : "OFF" }}
-											</button>
-											<button type="button" class="btn btn-lg" ng-if="heatingElementOverride.latest" ng-class="heatingElementOverride.latest ? 'btn-danger' : 'btn-info'" ng-attr-data-toggle="heatingElementOverride.latest" ng-click="toggleHeatingElementOverride()">
-												{{"{{"}}	 heatingElementOverride.latest ? "OVERRIDDEN" : "RELEASED" }}
-											</button>
-										</div>
-									</div>
-								</div>
+								<toggleable-element name="'Heating Element Status'" recipe-instance="recipeInstance" sensor="heatingElementStatusSensor" />
 							</div>
 							<div class="col-lg-3 col-sm-6">
-								<div class="panel panel-default">
-									<div class="panel-heading">
-										<header>Pump Status</header>
-									</div>
-									<div class="panel-body no-top-padding">
-										<div class="layout layout-align-center-vertical">
-											<div class="height-5">
-												<svg width="100" height="100">
-													<circle class="success" cx="35" cy="35" r="30"/>
-												</svg>
-											</div>
-										</div>
-									</div>
-								</div>
+								<toggleable-element name="'Pump Status'" recipe-instance="recipeInstance" sensor="heatingElementStatusSensor" />
 							</div>
 							<div class="col-lg-6">
 								<div class="panel panel-default panel-divider">
@@ -310,5 +283,6 @@
 		<script src="{{ static_url("js/third-party/underscore-min.js") }}"></script>
 		
 		<script src="{{ static_url("js/app/dashboard.js") }}" type='text/javascript'> </script>
+		<script src="{{ static_url("js/angular-directives/toggleable-element.js") }}" type='text/javascript'> </script>
 	</body>
 </html>

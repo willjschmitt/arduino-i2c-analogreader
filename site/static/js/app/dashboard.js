@@ -115,10 +115,7 @@ angular.module('app', [])
 		});
 	},500.);
 	
-	$scope.heatingElementStatus= {latest: true};
-	$scope.toggleHeatingElementStatus = function(){$scope.heatingElementStatus.latest = !$scope.heatingElementStatus.latest}
-	$scope.heatingElementOverride= {latest: true};
-	$scope.toggleHeatingElementOverride = function(){$scope.heatingElementOverride.latest = !$scope.heatingElementOverride.latest}
+	$scope.heatingElementStatusSensor = 8;
 	
 	$scope.tasks = [
 	    {name:"Sanitizing Soak"},
@@ -182,4 +179,23 @@ angular.module('app', [])
 		return $scope.chart;
 	}
 	nv.addGraph(updateChart);	
-}]);
+}])
+.directive('toggleableElement', function() {
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+    	name:"=",
+    	recipeInstance: "=",
+    	sensor: "=",
+    },
+    templateUrl: 'static/html/angular-directives/toggleable-element.html',
+    link: function ($scope) {
+    	$scope.elementStatus = {latest: true};
+    	$scope.toggleElementStatus = function(){$scope.elementStatus.latest = !$scope.elementStatus.latest}
+    	$scope.elementOverride = {latest: true};
+    	$scope.toggleElementOverride = function(){$scope.elementOverride.latest = !$scope.elementOverride.latest}
+    }
+  };
+});;
+//angular.module('toggleableElementModule', []);
