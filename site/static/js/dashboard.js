@@ -115,6 +115,11 @@ angular.module('app', [])
 		});
 	},500.);
 	
+	$scope.heatingElementStatus= {latest: true};
+	$scope.toggleHeatingElementStatus = function(){$scope.heatingElementStatus.latest = !$scope.heatingElementStatus.latest}
+	$scope.heatingElementOverride= {latest: true};
+	$scope.toggleHeatingElementOverride = function(){$scope.heatingElementOverride.latest = !$scope.heatingElementOverride.latest}
+	
 	$scope.chart = nv.models.lineChart()
 		.x(function(d) { return d[0] })
 		.y(function(d) { return d[1] }) //adjusting, 100% is 1.00, not 100 as it is in the data

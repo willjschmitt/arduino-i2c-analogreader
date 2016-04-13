@@ -207,9 +207,12 @@
 									<div class="panel-body no-top-padding">
 										<div class="layout layout-align-center-vertical">
 											<div class="height-5">
-												<svg width="30" height="30">
-													<circle class="success" cx="15" cy="15" r="10"/>
-												</svg>
+												<button type="button" class="btn btn-lg" ng-class="heatingElementStatus.latest ? 'btn-danger' : 'btn-info'" ng-attr-data-toggle="heatingElementStatus.latest" ng-click="toggleHeatingElementStatus()">
+													{{"{{"}}	 heatingElementStatus.latest ? "ON" : "OFF" }}
+												</button>
+												<button type="button" class="btn btn-lg" ng-if="heatingElementOverride.latest" ng-class="heatingElementOverride.latest ? 'btn-danger' : 'btn-info'" ng-attr-data-toggle="heatingElementOverride.latest" ng-click="toggleHeatingElementOverride()">
+													{{"{{"}}	 heatingElementOverride.latest ? "OVERRIDDEN" : "RELEASED" }}
+												</button>
 											</div>
 										</div>
 									</div>
