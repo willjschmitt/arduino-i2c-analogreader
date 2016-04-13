@@ -120,6 +120,18 @@ angular.module('app', [])
 	$scope.heatingElementOverride= {latest: true};
 	$scope.toggleHeatingElementOverride = function(){$scope.heatingElementOverride.latest = !$scope.heatingElementOverride.latest}
 	
+	$scope.tasks = [
+	    {name:"Sanitizing Soak"},
+	    {name:"Hot Sanitizing Recirculation"},
+	    {name:"Run Brew Cycle"},
+	    {name:"Measure Post-Mash Gravity"},
+	    {name:"Clean Mash Tun"},
+	    {name:"Sanitize Fermenters"},
+	    {name:"Measure Post-Boil Gravity"},
+	    {name:"Rack to Fermenters"},
+	    {name:"Clean Boil Kettle and Chiller"},	    
+	]
+	
 	$scope.chart = nv.models.lineChart()
 		.x(function(d) { return d[0] })
 		.y(function(d) { return d[1] }) //adjusting, 100% is 1.00, not 100 as it is in the data
