@@ -186,8 +186,8 @@ angular.module('app', [])
     templateUrl: 'static/html/angular-directives/toggleable-element.html',
     link: function ($scope) {
     	//subscribe to value and override 
-    	//$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
-    	//$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
+    	$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
+    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
     	
     	//status setters
     	$scope.toggleElementStatus = function(){
