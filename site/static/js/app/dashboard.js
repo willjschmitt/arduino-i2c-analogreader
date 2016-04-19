@@ -8,6 +8,8 @@ angular.module('app', [])
 		this.cursor = null;
 		
 		this.dataPoints = [];
+		
+		this.poll();
 	}
 	
 	service.prototype.poll =  function() {
@@ -52,53 +54,32 @@ angular.module('app', [])
     return service;
 })
 .controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
-	$scope.dataPoints = [];
-	$scope.chart = null;
 	
-	var dataPointsMap = {
-		0:{name: 'boilTemperatureActual'},
-		1:{name: 'boilTemperatureSetPoint'},
-		2:{name: 'mashTemperatureActual'},
-		3:{name: 'mashTemperatureSetPoint'},
-	}
-
 	function getCookie(name) {
 	    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
 	    return r ? r[1] : undefined;
-	}	
+	}
 	
-	//create new subscription services for the time series data
-	$scope.boilTemperatureActual = new timeSeriesUpdater(1,1);
+	$scope.recipeInstance = 1;
+	
+	//subscribe to all the time series
+	$scope.boilTemperatureActual = new timeSeriesUpdater($scope.recipeInstance,1);
+	$scope.boilTemperatureSetPoint = new timeSeriesUpdater($scope.recipeInstance,2);
+	$scope.mashTemperatureActual = new timeSeriesUpdater($scope.recipeInstance,3);
+	$scope.mashTemperatureSetPoint = new timeSeriesUpdater($scope.recipeInstance,4);
+	$scope.boilKettleDutyCycle = new timeSeriesUpdater($scope.recipeInstance,5);
+	$scope.boilKettlePower = new timeSeriesUpdater($scope.recipeInstance,6);
+	$scope.systemEnergy = new timeSeriesUpdater($scope.recipeInstance,7);
+	$scope.systemEnergyCost = new timeSeriesUpdater($scope.recipeInstance,8);
+	
+	//add all the relevant time series to the chart data.
+	$scope.dataPoints = [];
 	$scope.dataPoints.push({'key':'Boil Actual',values:$scope.boilTemperatureActual.dataPoints});
-	$scope.boilTemperatureActual.poll();
-	
-	$scope.boilTemperatureSetPoint = new timeSeriesUpdater(1,2);
 	$scope.dataPoints.push({'key':'Boil Set Point','values':$scope.boilTemperatureSetPoint.dataPoints});
-	$scope.boilTemperatureSetPoint.poll();
-	
-	$scope.mashTemperatureActual = new timeSeriesUpdater(1,3);
 	$scope.dataPoints.push({'key':'Mash Actual',values:$scope.mashTemperatureActual.dataPoints});
-	$scope.mashTemperatureActual.poll();
-	
-	$scope.mashTemperatureSetPoint = new timeSeriesUpdater(1,4);
 	$scope.dataPoints.push({'key':'Mash Set Point','values':$scope.mashTemperatureSetPoint.dataPoints});
-	$scope.mashTemperatureSetPoint.poll();
-	
-	$scope.boilKettleDutyCycle = new timeSeriesUpdater(1,5);
-	$scope.boilKettleDutyCycle.poll();
-	
-	$scope.boilKettlePower = new timeSeriesUpdater(1,6);
-	$scope.boilKettlePower.poll();
-	
-	$scope.systemEnergy = new timeSeriesUpdater(1,7);
-	$scope.systemEnergy.poll();
-	
-	$scope.systemEnergyCost = new timeSeriesUpdater(1,8);
-	$scope.systemEnergyCost.poll();
-	
-	//TODO: don't know why the timeSeriesUpdater change isn't propogating unless I touch it? I really should be having to do a time check...
-	$interval(updateChart,1000.);
-	
+
+	//update the pie chart dial color class based on the value
 	$interval(function(){
 		$("#dutycycledial").simplePieChart("set",$scope.boilKettleDutyCycle.latest*100.);
 		var colorClasses = {
@@ -115,8 +96,16 @@ angular.module('app', [])
 		});
 	},500.);
 	
-	$scope.heatingElementStatusSensor = 8;
 	
+	//overridable statuses - sensor ids for the child elements
+	$scope.heatingElementStatusSensor = 9;
+	$scope.heatingElementStatusSensorOverride = 10;
+	
+	$scope.pumpStatusSensor = 11;
+	$scope.pumpStatusSensorOverride = 12;
+	
+	
+	//list of tasks to be displayed in the task list
 	$scope.tasks = [
 	    {name:"Sanitizing Soak"},
 	    {name:"Hot Sanitizing Recirculation"},
@@ -129,6 +118,8 @@ angular.module('app', [])
 	    {name:"Clean Boil Kettle and Chiller"},	    
 	]
 	
+	//create and maintain chart 
+	$scope.chart = null;
 	$scope.chart = nv.models.lineChart()
 		.x(function(d) { return d[0] })
 		.y(function(d) { return d[1] }) //adjusting, 100% is 1.00, not 100 as it is in the data
@@ -151,6 +142,7 @@ angular.module('app', [])
 		nv.utils.windowResize($scope.chart.update);
 		
 		//calculate min/max in current dataset
+		//TODO: I don't know why nvd3 messes up sometimes, but we had to force calculat this
 		var min = _.reduce($scope.dataPoints,function(currentMin,dataPointArray){
 			var min = _.reduce(dataPointArray.values,function(currentMin,dataPoint){
 				return Math.min(dataPoint[1],currentMin);
@@ -173,14 +165,14 @@ angular.module('app', [])
 		}
 		
 		//update min/max
-		//TODO: I don't know why nvd3 messes up sometimes, but we had to force calculat this
 		$scope.chart.forceY([min,max]);
 
 		return $scope.chart;
 	}
-	nv.addGraph(updateChart);	
+	nv.addGraph(updateChart);
+	$interval(updateChart,1000.);//replot every second rather than everytime we get new data so we arent plotting all the time
 }])
-.directive('toggleableElement', function() {
+.directive('toggleableElement', ['timeSeriesUpdater', function(timeSeriesUpdater) {
   return {
     restrict: 'E',
     transclude: true,
@@ -188,14 +180,53 @@ angular.module('app', [])
     	name:"=",
     	recipeInstance: "=",
     	sensor: "=",
+    	sensorOverride: "=",
     },
     templateUrl: 'static/html/angular-directives/toggleable-element.html',
     link: function ($scope) {
-    	$scope.elementStatus = {latest: true};
-    	$scope.toggleElementStatus = function(){$scope.elementStatus.latest = !$scope.elementStatus.latest}
-    	$scope.elementOverride = {latest: true};
-    	$scope.toggleElementOverride = function(){$scope.elementOverride.latest = !$scope.elementOverride.latest}
+    	//subscribe to value and override 
+    	$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
+    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
+    	
+    	//status setters
+    	$scope.toggleElementStatus = function(){
+        	$scope.setElementStatus(!$scope.elementStatus.latest);
+    	};
+    	$scope.setElementStatus = function(statusValue){
+    		function __setElementStatus(statusValue){
+	    		$.ajax({
+	    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
+	    			data: $.param({
+		    			recipe_instance: $scope.recipeInstance,
+		    			sensor: $scope.sensor,
+		    			value: statusValue
+		    		})
+		    	});
+	    	}
+    		
+    		//make sure we have the override set
+    		if (!$scope.elementOverride.latest)
+    			$scope.toggleElementOverride(function(){__setElementStatus(statusValue);});
+    		else
+    			__setElementStatus(statusValue);
+    	};
+    	
+    	
+    	//override setters
+    	$scope.toggleElementOverride = function(callback){
+    		$scope.setElementOverride(!$scope.elementOverride,callback);
+    	};
+    	$scope.setElementOverride = function(overrideValue){
+    		$.ajax({
+    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
+    			data: $.param({
+        			recipe_instance: $scope.recipeInstance,
+        			sensor: $scope.sensor,
+        			value: overrideValue
+        		}), success: function(){if (callback) callback();}
+        	});
+    	}
     }
   };
-});;
+}]);
 //angular.module('toggleableElementModule', []);

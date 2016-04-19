@@ -90,6 +90,7 @@ class TimeSeriesNewHandler(tornado.web.RequestHandler):
         for fieldName in fields:
             field = TimeSeriesDataPoint._meta.get_field(fieldName)
             if field.is_relation:
+                print fieldName, self.get_argument(fieldName)
                 newDataPoint[fieldName] = field.related_model.objects.get(pk=self.get_argument(fieldName))
             else:
                 newDataPoint[fieldName] = self.get_body_argument(fieldName)

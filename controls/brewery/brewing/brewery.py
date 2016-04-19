@@ -16,6 +16,17 @@ from controls.dsp import stateMachine
 
 import logging
 
+import json
+
+import functools
+from controls.utils import overridableVariable
+def rsetattr(obj, attr, val):
+    pre, _, post = attr.rpartition('.')
+    return setattr(rgetattr(obj, pre) if pre else obj, post, val)
+
+def rgetattr(obj, attr):
+    return functools.reduce(getattr, [obj]+attr.split('.'))
+
 class brewery(object):
     '''
     classdocs
@@ -28,7 +39,8 @@ class brewery(object):
         logging.info('Initializing Brewery object')
         self.scheduler = sched.scheduler(time.time,time.sleep)
         
-        self.dataService = "http://localhost:8888/live/timeseries/new/"
+        self.dataPostService = "http://localhost:8888/live/timeseries/new/"
+        self.dataSubscribeService = "http://localhost:8888/live/timeseries/subscribe/"
         self.recipeInstance = 1
         
         #state machine initialization
@@ -77,6 +89,8 @@ class brewery(object):
         self.tm1_tz1 = time.time() 
         self.task00()
         
+        self.watchedVar = overridableVariable(9,10)
+        
         self.scheduler.run()
         
     def task00(self):
@@ -109,61 +123,29 @@ class brewery(object):
     def postData(self):
         #post temperature updates to server
         import requests
-        import json
         
         sampleTime = str(datetime.datetime.now())
         
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.boilKettle.temperature,'sensor':1
-            }
-        )
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.boilKettle.temperatureSetPoint,'sensor':2
-            }
-        )
+        sensors = [
+            {'value':self.boilKettle.temperature,'sensor':1},
+            {'value':self.boilKettle.temperatureSetPoint,'sensor':2},
+            {'value':self.mashTun.temperature,'sensor':3},
+            {'value':self.mashTun.temperatureSetPoint,'sensor':4},
+            {'value':self.boilKettle.dutyCycle,'sensor':5},
+            {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'sensor':6},
+            {'value':self.systemEnergy,'sensor':7},
+            {'value':self.systemEnergyCost, 'sensor':8},
+            
+        ]
         
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.mashTun.temperature,'sensor':3
-            }
-        )
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.mashTun.temperatureSetPoint,'sensor':4
-            }
-        )
+        for sensor in sensors:
+            requests.post(self.dataPostService,
+                data={
+                    'time':sampleTime,'recipe_instance':self.recipeInstance,
+                    'value':sensor['value'],'sensor':sensor['sensor']
+                }
+            )
         
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.boilKettle.dutyCycle,'sensor':5
-            }
-        )
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'sensor':6
-            }
-        )
-        
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.systemEnergy,'sensor':7
-            }
-        )
-        requests.post(self.dataService,
-            data={
-                'time':sampleTime,'recipe_instance':self.recipeInstance,
-                'value':self.systemEnergyCost, 'sensor':8
-            }
-        )
         
     def statePrestart(self):
         '''
