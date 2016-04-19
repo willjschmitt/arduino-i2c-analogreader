@@ -1,5 +1,34 @@
 angular.module('app', [])
-.factory('timeSeriesUpdater',function(){
+.service('timeSeriesSocket',function(){
+	this._subscribers = {};
+	this._isopen=false;
+	
+	this._msgqueue = [];
+	this._flushqueue = function(){
+		for (msg in this._msgqueue) this._socket.send(msg);
+	}
+	
+	this._socket = new WebSocket("ws://localhost:8888/live/timeseries/socket/");
+	this._socket.onopen = function(){ console.log("Socket has been opened!"); this._isopen = true; this._flushqueue(); }.bind(this);
+	this._socket.onmessage = function(msg){
+		console.log('got it');
+		this._subscribers[msg.sensor].newData([msg]);
+	};
+	this._socket.onclose = function(){
+  		console.log('closed');
+  		this._isopen=false;
+	}.bind(this);
+	
+	this.subscribe = function(subscriber){
+		this._subscribers[subscriber.sensor] = subscriber;
+		this._msgqueue.push({
+			recipe_instance: subscriber.recipe_instance,
+			sensor: subscriber.sensor,
+		});
+		if (this._isopen) this._flushqueue();
+	};
+})
+.factory('timeSeriesUpdater',['timeSeriesSocket',function(timeSeriesSocket){
 	var service = function(recipe_instance,sensor){
 		this.recipe_instance = recipe_instance;
 		this.sensor = sensor;
@@ -10,6 +39,8 @@ angular.module('app', [])
 		this.dataPoints = [];
 		
 		this.poll();
+		var self = this;
+		timeSeriesSocket.subscribe(self)
 	}
 	
 	service.prototype.poll =  function() {
@@ -52,7 +83,7 @@ angular.module('app', [])
 	};
     
     return service;
-})
+}])
 .controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
 	
 	function getCookie(name) {
@@ -185,8 +216,8 @@ angular.module('app', [])
     templateUrl: 'static/html/angular-directives/toggleable-element.html',
     link: function ($scope) {
     	//subscribe to value and override 
-    	$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
-    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
+    	//$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
+    	//$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
     	
     	//status setters
     	$scope.toggleElementStatus = function(){
