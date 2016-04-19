@@ -1,11 +1,11 @@
 angular.module('app', [])
 .service('timeSeriesSocket',function(){
-	this._subscribers = {};
-	this._isopen=false;
-	
+	//message queue lets us queue up items while the socket is not currently open
 	this._msgqueue = [];
 	this._flushqueue = function(){ for (msg in this._msgqueue){this._socket.send(JSON.stringify(this._msgqueue[msg]))}; }
 	
+	//handle the fundamentals of creating and managing the websocket
+	this._isopen=false;
 	this._socket = new WebSocket("ws://localhost:8888/live/timeseries/socket/");
 	this._socket.onopen = function(){
 		this._isopen = true; this._flushqueue();
@@ -18,6 +18,8 @@ angular.module('app', [])
   		this._isopen=false;
 	}.bind(this);
 	
+	//entry point for subscriptions to initiate the subscription
+	this._subscribers = {};
 	this.subscribe = function(subscriber){
 		this._subscribers[subscriber.sensor] = subscriber;
 		this._msgqueue.push({
