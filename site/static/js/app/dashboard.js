@@ -4,18 +4,17 @@ angular.module('app', [])
 	this._isopen=false;
 	
 	this._msgqueue = [];
-	this._flushqueue = function(){
-		for (msg in this._msgqueue) this._socket.send(msg);
-	}
+	this._flushqueue = function(){ for (msg in this._msgqueue){this._socket.send(JSON.stringify(this._msgqueue[msg]))}; }
 	
 	this._socket = new WebSocket("ws://localhost:8888/live/timeseries/socket/");
-	this._socket.onopen = function(){ console.log("Socket has been opened!"); this._isopen = true; this._flushqueue(); }.bind(this);
+	this._socket.onopen = function(){
+		this._isopen = true; this._flushqueue();
+	}.bind(this);
 	this._socket.onmessage = function(msg){
-		console.log('got it');
-		this._subscribers[msg.sensor].newData([msg]);
-	};
+		var parsed = JSON.parse(msg.data)
+		this._subscribers[parsed.sensor].newData([parsed]);
+	}.bind(this);
 	this._socket.onclose = function(){
-  		console.log('closed');
   		this._isopen=false;
 	}.bind(this);
 	
@@ -24,6 +23,7 @@ angular.module('app', [])
 		this._msgqueue.push({
 			recipe_instance: subscriber.recipe_instance,
 			sensor: subscriber.sensor,
+			subscribe: true
 		});
 		if (this._isopen) this._flushqueue();
 	};
@@ -38,45 +38,13 @@ angular.module('app', [])
 		
 		this.dataPoints = [];
 		
-		this.poll();
 		var self = this;
 		timeSeriesSocket.subscribe(self)
 	}
-	
-	service.prototype.poll =  function() {
-        var args = {};//{"_xsrf": getCookie("_xsrf")};
-        if (this.cursor) args.cursor = this.cursor;
-        args.recipe_instance = this.recipe_instance;
-        args.sensor = this.sensor;
-        var self = this;
-        $.ajax({url: "/live/timeseries/subscribe/", type: "POST", dataType: "text",
-        	data: $.param(args), success: this.onSuccess.bind(self),
-        	error: this.onError.bind(self)
-        });
-    };
-    
-    service.prototype.onSuccess = function(response) {
-        try {this.newData(eval("(" + response + ")"));}
-        catch (e) {this.onError();return;}
-        this.errorSleepTime = 500;
-        var self = this;
-        window.setTimeout(this.poll.bind(self), 0);
-    };
-    
-    service.prototype.onError = function(response) {
-    	this.errorSleepTime *= 2;
-        console.log("Poll error; sleeping for", this.errorSleepTime, "ms");
-        var self = this;
-        window.setTimeout(this.poll.bind(self), this.errorSleepTime);
-    };
 
-	service.prototype.newData = function(response) {
-	    if (!response.dataPoints) return;
-	    this.cursor = response.cursor;
-	    this.cursor = response.dataPoints[response.dataPoints.length - 1].id;
-	    //console.log(response.dataPoints.length, "new messages, cursor:", updater.cursor);
-	    for (var i = 0; i < response.dataPoints.length; i++) {
-	    	var dataPoint = response.dataPoints[i];
+	service.prototype.newData = function(dataPointsIn) {
+	    for (var i = 0; i < dataPointsIn.length; i++) {
+	    	var dataPoint = dataPointsIn[i];
 	    	this.dataPoints.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
 	    	this.latest = parseFloat(dataPoint.value);
 	    }
