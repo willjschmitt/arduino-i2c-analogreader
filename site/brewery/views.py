@@ -66,7 +66,6 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         logging.info("got message %r", message)
         parsed = tornado.escape.json_decode(message)
-        print parsed,message
         if 'subscribe' in parsed:
             key = (parsed['recipe_instance'],parsed['sensor'])
             if key not in TimeSeriesSocketHandler.subscriptions: TimeSeriesSocketHandler.subscriptions[key] = []

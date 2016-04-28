@@ -11,7 +11,7 @@ angular.module('app', [])
 		this._isopen = true; this._flushqueue();
 	}.bind(this);
 	this._socket.onmessage = function(msg){
-		var parsed = JSON.parse(msg.data)
+		var parsed = JSON.parse(msg.data);
 		this._subscribers[parsed.sensor].newData([parsed]);
 	}.bind(this);
 	this._socket.onclose = function(){
