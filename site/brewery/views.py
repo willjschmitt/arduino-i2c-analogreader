@@ -20,9 +20,6 @@ from models import TimeSeriesDataPoint
 from django.db.models import ForeignKey
 
 import logging
-import random
-import time
-import uuid
 
 # Create your views here.
 class MainHandler(tornado.web.RequestHandler):
@@ -58,11 +55,12 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
     def send_updates(cls, newDataPoint):
         logging.info("sending message to %d waiters", len(cls.waiters))
         key = (newDataPoint['recipe_instance'],newDataPoint['sensor'])
-        for waiter in cls.subscriptions[key]:
-            try:
-                waiter.write_message(newDataPoint)
-            except:
-                logging.error("Error sending message", exc_info=True)
+        if key in cls.subscriptions:
+            for waiter in cls.subscriptions[key]:
+                try:
+                    waiter.write_message(newDataPoint)
+                except:
+                    logging.error("Error sending message", exc_info=True)
 
     def on_message(self, message):
         logging.info("got message %r", message)
@@ -114,8 +112,9 @@ class TimeSeriesNewHandler(tornado.web.RequestHandler):
 class TimeSeriesIdentifyHandler(tornado.web.RequestHandler):
     def post(self):
         try:#see if we can ge an existing AssetSensor
-            sensor = AssetSensor.objects.get(pk=self.get_argument('sensor'),asset=Asset.objects.get(id=1))#TODO: programatically get asset
+            sensor = AssetSensor.objects.get(name=self.get_argument('name'),asset=Asset.objects.get(id=1))#TODO: programatically get asset
         except ObjectDoesNotExist as e: #otherwise create one for recording data
+            logging.debug('Creating new asset sensor {} for asset {}'.format(self.get_argument('name'),1))
             sensor = AssetSensor(name=self.get_argument('name'),asset=Asset.objects.get(id=1)).save()#TODO: programatically get asset
         self.write({'sensor':sensor.pk})
         self.finish()

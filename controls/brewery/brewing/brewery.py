@@ -14,7 +14,11 @@ from simplePump import simplePump
 
 from controls.dsp import stateMachine
 
+import requests
+
 import logging
+
+from controls.settings import host
 
 import functools
 from controls.utils import overridableVariable
@@ -37,8 +41,8 @@ class brewery(object):
         logging.info('Initializing Brewery object')
         self.scheduler = sched.scheduler(time.time,time.sleep)
         
-        self.dataPostService = "http://localhost:8888/live/timeseries/new/"
-        self.dataIdentifyService = "http://localhost:8888/live/timeseries/identify/"
+        self.dataPostService = "http:" + host + "/live/timeseries/new/"
+        self.dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
         self.recipeInstance = 1
         self.sensorMap = {}
         
@@ -88,7 +92,7 @@ class brewery(object):
         self.tm1_tz1 = time.time() 
         self.task00()
         
-        self.watchedVar = overridableVariable(9,10)
+        #self.watchedVar = overridableVariable(9,10)
         
         self.scheduler.run()
         
@@ -120,9 +124,7 @@ class brewery(object):
         self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
         
     def postData(self):
-        #post temperature updates to server
-        import requests
-        
+        #post temperature updates to server        
         sampleTime = str(datetime.datetime.now())
         
         sensors = [
