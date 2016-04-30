@@ -16,8 +16,6 @@ from controls.dsp import stateMachine
 
 import logging
 
-import json
-
 import functools
 from controls.utils import overridableVariable
 def rsetattr(obj, attr, val):
@@ -40,8 +38,9 @@ class brewery(object):
         self.scheduler = sched.scheduler(time.time,time.sleep)
         
         self.dataPostService = "http://localhost:8888/live/timeseries/new/"
-        self.dataSubscribeService = "http://localhost:8888/live/timeseries/subscribe/"
+        self.dataIdentifyService = "http://localhost:8888/live/timeseries/identify/"
         self.recipeInstance = 1
+        self.sensorMap = {}
         
         #state machine initialization
         self.state = stateMachine(self)
@@ -127,22 +126,27 @@ class brewery(object):
         sampleTime = str(datetime.datetime.now())
         
         sensors = [
-            {'value':self.boilKettle.temperature,'sensor':1},
-            {'value':self.boilKettle.temperatureSetPoint,'sensor':2},
-            {'value':self.mashTun.temperature,'sensor':3},
-            {'value':self.mashTun.temperatureSetPoint,'sensor':4},
-            {'value':self.boilKettle.dutyCycle,'sensor':5},
-            {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'sensor':6},
-            {'value':self.systemEnergy,'sensor':7},
-            {'value':self.systemEnergyCost, 'sensor':8},
-            
+            {'value':self.boilKettle.temperature,'name':'boilKettle__temperature'},
+            {'value':self.boilKettle.temperatureSetPoint,'name':'boilKettle__temperatureSetPoint'},
+            {'value':self.mashTun.temperature,'name':'mashTun__temperature'},
+            {'value':self.mashTun.temperatureSetPoint,'name':'mashTun_temperature_setPoint'},
+            {'value':self.boilKettle.dutyCycle,'name':'boilKettle__dutyCycle'},
+            {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'name':'boilKettle__power'},
+            {'value':self.systemEnergy,'name':'systemEnergy'},
+            {'value':self.systemEnergyCost,'name':'systemEnergyCost'},
         ]
         
         for sensor in sensors:
+            #get the sensor ID if we dont have it already
+            if sensor['name'] not in self.sensorMap:
+                r = requests.post(self.dataIdentifyService,
+                    data={'recipe_instance':self.recipeInstance,'name':sensor['name']}
+                )
+                self.sensorMap['name'] = r.json()['sensor']
             requests.post(self.dataPostService,
                 data={
                     'time':sampleTime,'recipe_instance':self.recipeInstance,
-                    'value':sensor['value'],'sensor':sensor['sensor']
+                    'value':sensor['value'],'sensor':self.sensorMap['name']
                 }
             )
         

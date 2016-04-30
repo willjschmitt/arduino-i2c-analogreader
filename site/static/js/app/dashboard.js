@@ -12,7 +12,7 @@ angular.module('app', [])
 	}.bind(this);
 	this._socket.onmessage = function(msg){
 		var parsed = JSON.parse(msg.data);
-		this._subscribers[parsed.sensor].newData([parsed]);
+		this._subscribers[parsed.name].newData([parsed]);
 	}.bind(this);
 	this._socket.onclose = function(){
   		this._isopen=false;
@@ -21,19 +21,19 @@ angular.module('app', [])
 	//entry point for subscriptions to initiate the subscription
 	this._subscribers = {};
 	this.subscribe = function(subscriber){
-		this._subscribers[subscriber.sensor] = subscriber;
+		this._subscribers[subscriber.name] = subscriber;
 		this._msgqueue.push({
 			recipe_instance: subscriber.recipe_instance,
-			sensor: subscriber.sensor,
+			name: subscriber.name,
 			subscribe: true
 		});
 		if (this._isopen) this._flushqueue();
 	};
 })
 .factory('timeSeriesUpdater',['timeSeriesSocket',function(timeSeriesSocket){
-	var service = function(recipe_instance,sensor){
+	var service = function(recipe_instance,name){
 		this.recipe_instance = recipe_instance;
-		this.sensor = sensor;
+		this.name = name;
 		
 		this.errorSleepTime = 500;
 		this.cursor = null;
@@ -64,14 +64,14 @@ angular.module('app', [])
 	$scope.recipeInstance = 1;
 	
 	//subscribe to all the time series
-	$scope.boilTemperatureActual = new timeSeriesUpdater($scope.recipeInstance,1);
-	$scope.boilTemperatureSetPoint = new timeSeriesUpdater($scope.recipeInstance,2);
-	$scope.mashTemperatureActual = new timeSeriesUpdater($scope.recipeInstance,3);
-	$scope.mashTemperatureSetPoint = new timeSeriesUpdater($scope.recipeInstance,4);
-	$scope.boilKettleDutyCycle = new timeSeriesUpdater($scope.recipeInstance,5);
-	$scope.boilKettlePower = new timeSeriesUpdater($scope.recipeInstance,6);
-	$scope.systemEnergy = new timeSeriesUpdater($scope.recipeInstance,7);
-	$scope.systemEnergyCost = new timeSeriesUpdater($scope.recipeInstance,8);
+	$scope.boilTemperatureActual = new timeSeriesUpdater($scope.recipeInstance,'boilKettle__temperature');
+	$scope.boilTemperatureSetPoint = new timeSeriesUpdater($scope.recipeInstance,'boilKettle__temperatureSetPoint');
+	$scope.mashTemperatureActual = new timeSeriesUpdater($scope.recipeInstance,'mashTun__temperature');
+	$scope.mashTemperatureSetPoint = new timeSeriesUpdater($scope.recipeInstance,'mashTun__temperatureSetPoint');
+	$scope.boilKettleDutyCycle = new timeSeriesUpdater($scope.recipeInstance,'boilKettle_dutyCycle');
+	$scope.boilKettlePower = new timeSeriesUpdater($scope.recipeInstance,'boilKettle_power');
+	$scope.systemEnergy = new timeSeriesUpdater($scope.recipeInstance,'systemEnergy');
+	$scope.systemEnergyCost = new timeSeriesUpdater($scope.recipeInstance,'systemEnergyCost');
 	
 	//add all the relevant time series to the chart data.
 	$scope.dataPoints = [];
