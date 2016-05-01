@@ -106,25 +106,6 @@
 								</div>
 							</div>							
 							<div class="col-lg-3 col-sm-6">
-								<div class="row">
-									<div class="col-sm-12">
-										<div class="panel panel-default">
-											<div class="panel-body no-padding">
-												<div class="mini-card mini-card-primary">
-													<div class="mini-card-left">
-														<span>Power Usage</span>
-														<h2>{{ "{{" }} boilKettlePower.latest/1000. | number : 1}}kW</h2>
-													</div>
-													<div class="mini-card-right">
-														<div class="bemat-mini-chart bemat-mini-chart-primary">
-															<span class="peity-line">5,3,9,6,5,9,7,3,5,8</span>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
 								<div class="row"><div class="col-sm-12"><value-card title="'Electric Load'" value="boilKettlePower.latest" units="'kW'""/></div></div>
 								<div class="row"><div class="col-sm-12"><value-card title="'Energy Consumption'" value="systemEnergy.latest" value-alternate="systemEnergyCost.latest" units="'Wh'" units-alternate="'$'"/></div></div>
 								<div class="row"><div class="col-sm-12"><value-card title="'Boil Kettle Temperature'" value="boilTemperatureActual.latest" value-alternate="boilTemperatureSetPoint.latest" units="'&deg;F'"/></div></div>
