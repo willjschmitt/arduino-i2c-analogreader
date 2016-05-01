@@ -131,7 +131,7 @@ class brewery(object):
             {'value':self.boilKettle.temperature,'name':'boilKettle__temperature'},
             {'value':self.boilKettle.temperatureSetPoint,'name':'boilKettle__temperatureSetPoint'},
             {'value':self.mashTun.temperature,'name':'mashTun__temperature'},
-            {'value':self.mashTun.temperatureSetPoint,'name':'mashTun_temperatureSetPoint'},
+            {'value':self.mashTun.temperatureSetPoint,'name':'mashTun__temperatureSetPoint'},
             {'value':self.boilKettle.dutyCycle,'name':'boilKettle__dutyCycle'},
             {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'name':'boilKettle__power'},
             {'value':self.systemEnergy,'name':'systemEnergy'},
