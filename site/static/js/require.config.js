@@ -44,6 +44,10 @@ requirejs.config({
 		"subheader":        "../vendor/subheader/jquery.subheader",
 		"simplePieChart":   "../vendor/simplePieChart/jquery.simplePieChart",
 		
+		//d3 plugins
+		"d3": "../vendor/d3/d3.v3",
+		"nvd3": "../vendor/nvd3/nv.d3",
+		
 		//bemat
 		"bemat-common":        "bemat/bemat-admin-common",
 		"bemat-demo":          "bemat/bemat-admin-demo",
@@ -89,6 +93,8 @@ requirejs.config({
         //"bootstrap-select": {"deps":["bootstrap",'jquery']},
         //"bootstrap_dataTables": {"deps":["bootstrap"]},
         "wysihtml5": {"deps":["bootstrap",'jquery']},
+        
+        "nvd3":{"deps":['d3']},
         
         //bemat reqs
         "bemat-common": {"deps":['perfect-scrollbar','bootstrap-select']},
