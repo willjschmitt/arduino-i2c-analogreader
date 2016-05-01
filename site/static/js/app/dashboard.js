@@ -8,7 +8,7 @@ define(['angularAMD','underscore','jquery',
            "materialRipple","snackbar","toasts","speedDial","circularProgress",
            "linearProgress","subheader","simplePieChart",
            
-           "bemat-common","bemat-demo","bemat-demo-chartist","bemat-demo-dashboard",
+           "bemat-common",//"bemat-demo",//"bemat-demo-chartist","bemat-demo-dashboard",
            
            "jquery-ui","bootstrap","modernizr",
            
@@ -71,7 +71,6 @@ define(['angularAMD','underscore','jquery',
 	    return service;
 	}])
 	.controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
-		
 		function getCookie(name) {
 		    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
 		    return r ? r[1] : undefined;
@@ -134,6 +133,27 @@ define(['angularAMD','underscore','jquery',
 		    {name:"Rack to Fermenters"},
 		    {name:"Clean Boil Kettle and Chiller"},	    
 		]
+		
+		
+		/**
+		 * Peity
+		 */
+		$(".peity-line").peity("line",{
+			height: 28,
+			width: 64
+		});
+		
+		
+		$.toasts("add",{
+			msg: 		"Welcome to Joulia!",
+		});
+
+		$.snackbar("add",{
+			type: 		"danger",
+			msg: 		"Connection lost. Reestablishing connection.",
+			buttonText: "Close",
+		});
+
 		
 		//create and maintain chart 
 		$scope.chart = null;
