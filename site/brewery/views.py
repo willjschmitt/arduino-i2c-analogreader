@@ -67,7 +67,7 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
         parsed = tornado.escape.json_decode(message)
         if 'subscribe' in parsed:
             if 'sensor' not in parsed:
-                parsed['sensor'] = AssetSensor.objects.get(name=parsed['name'],asset=1)#TODO: programatically get asset
+                parsed['sensor'] = AssetSensor.objects.get(sensor=parsed['sensor'],asset=1)#TODO: programatically get asset
                 
             key = (parsed['recipe_instance'],parsed['sensor'])
             if key not in TimeSeriesSocketHandler.subscriptions: TimeSeriesSocketHandler.subscriptions[key] = []
@@ -115,6 +115,7 @@ class TimeSeriesIdentifyHandler(tornado.web.RequestHandler):
             sensor = AssetSensor.objects.get(name=self.get_argument('name'),asset=Asset.objects.get(id=1))#TODO: programatically get asset
         except ObjectDoesNotExist as e: #otherwise create one for recording data
             logging.debug('Creating new asset sensor {} for asset {}'.format(self.get_argument('name'),1))
-            sensor = AssetSensor(name=self.get_argument('name'),asset=Asset.objects.get(id=1)).save()#TODO: programatically get asset
+            sensor = AssetSensor(name=self.get_argument('name'),asset=Asset.objects.get(id=1))#TODO: programatically get asset
+            sensor.save()
         self.write({'sensor':sensor.pk})
         self.finish()
