@@ -79,20 +79,11 @@ define(['angularAMD','underscore','jquery',
 		    {name:"Clean Boil Kettle and Chiller"},	    
 		]
 		
-		
-		/**
-		 * Peity
-		 */
-		$(".peity-line").peity("line",{
-			height: 28,
-			width: 64
-		});
+		//give us all the little line things for the little cards
+		$(".peity-line").peity("line",{height: 28,width: 64});
 		
 		
-		$.toasts("add",{
-			msg: 		"Welcome to Joulia!",
-		});
-
+		$.toasts("add",{msg: "Welcome to Joulia!"});
 		$.snackbar("add",{
 			type: 		"danger",
 			msg: 		"Connection lost. Reestablishing connection.",
@@ -100,7 +91,9 @@ define(['angularAMD','underscore','jquery',
 		});
 
 		
-		//create and maintain chart 
+		/**
+		 * create and maintain chart
+		 */ 
 		$scope.chart = null;
 		$scope.chart = nv.models.lineChart()
 			.x(function(d) { return d[0] })
@@ -137,17 +130,13 @@ define(['angularAMD','underscore','jquery',
 				},Infinity);
 				return Math.max(min,currentMax);
 			},-Infinity);
-			
-			//make sure we have a spread
-			var minSpread = 10.;
+			var minSpread = 10.; //make sure we have a spread
 			if ((max-min) < minSpread){
 				var spreadAdjust = (minSpread-(max-min))*.5;
 				max+= spreadAdjust;
 				max-= spreadAdjust;
 			}
-			
-			//update min/max
-			$scope.chart.forceY([min,max]);
+			$scope.chart.forceY([min,max]);//update min/max
 	
 			return $scope.chart;
 		}
