@@ -58,13 +58,13 @@ var initstate = (function() {
 	/**
 	 * Bootstrap3 wysihtml5 Editor
 	 */
-	$(function($){
-		$("#wysihtml5").wysihtml5({
-			toolbar: {
-				fa: true
-			}
-		});
-	});
+//	$(function($){
+//		$("#wysihtml5").wysihtml5({
+//			toolbar: {
+//				fa: true
+//			}
+//		});
+//	});
 
 
 	/**

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html>
     <head>
 		<meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,6 +21,9 @@
 		<script src="{{ static_url("vendor/d3/d3.v3.js") }}" charset="utf-8"></script>
 		<script src="{{ static_url("vendor/nvd3/nv.d3.js") }}" type="text/javascript"></script>
 		<link href="{{ static_url("vendor/nvd3/nv.d3.css") }}" rel="stylesheet">
+		
+		<script data-main="{{ static_url("js/require.config.js") }}" src="{{ static_url("js/third-party/require.js") }}"></script>
+		
 	</head>
 
 	<body class="dark-sidebar dark-header-brand container-fluid">
@@ -233,54 +236,5 @@
 			</section><!-- /#right-content-wrapper -->
 
 		</div>
-
-
-		<!-- Core Scripts - Include with every page -->
-		<script src="{{ static_url("js/lib/jquery-1.10.2.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("js/lib/jquery-ui.custom.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("js/lib/bootstrap.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("js/lib/modernizr-2.6.2-respond-1.1.0.min.js") }}" type="text/javascript"></script>
-
-		<script src="{{ static_url("js/third-party/angular.min.js") }}"></script>
-
-		<!-- Page-Level Plugin Scripts - Dashboard -->
-		<script src="{{ static_url("vendor/google-code-prettify/prettify.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/perfectscrollbar/perfect-scrollbar.jquery.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/iCheck/icheck.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/bootstrap-select/bootstrap-select.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/DataTables/js/jquery.dataTables.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/DataTables/js/dataTables.bootstrap.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/DataTables/js/dataTables.bootstrap.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/fullscreen/jquery.fullscreen-min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/fullcalendar/moment.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/fullcalendar/fullcalendar.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/sparkline/jquery.sparkline.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/peity/jquery.peity.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/chartist/chartist.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/summernote/summernote.min.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/ckeditor/ckeditor.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/wysihtml5/bootstrap3-wysihtml5.all.min.js") }}" type="text/javascript"></script>
-
-		<!-- Cerocreativo Plugins -->
-		<script src="{{ static_url("vendor/materialRipple/jquery.materialRipple.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/snackbar/jquery.snackbar.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/toasts/jquery.toasts.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/speedDial/jquery.speedDial.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/circularProgress/jquery.circularProgress.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/linearProgress/jquery.linearProgress.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/subheader/jquery.subheader.js") }}" type="text/javascript"></script>
-		<script src="{{ static_url("vendor/simplePieChart/jquery.simplePieChart.js") }}" type="text/javascript"></script>
-
-		<!-- Bemat Admin Scripts - Included with every page -->		
-		<script src="{{ static_url("js/bemat/bemat-admin-common.min.js") }}"></script>
-		<script src="{{ static_url("js/bemat/bemat-admin-demo.min.js") }}"></script> 
-
-		<script src="{{ static_url("js/bemat/bemat-admin-demo-chartist.min.js") }}"></script>
-		<script src="{{ static_url("js/bemat/bemat-admin-demo-dashboard.min.js") }}"></script>
-		
-		<script src="{{ static_url("js/third-party/underscore-min.js") }}"></script>
-		
-		<script src="{{ static_url("js/app/dashboard.js") }}" type='text/javascript'> </script>
-		<script src="{{ static_url("js/angular-directives/toggleable-element.js") }}" type='text/javascript'> </script>
 	</body>
 </html>
