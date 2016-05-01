@@ -63,7 +63,6 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
                     logging.error("Error sending message", exc_info=True)
 
     def on_message(self, message):
-        logging.info("got message %r", message)
         parsed = tornado.escape.json_decode(message)
         if 'subscribe' in parsed:
             if 'sensor' not in parsed:
@@ -107,6 +106,9 @@ class TimeSeriesNewHandler(tornado.web.RequestHandler):
                 newDataPoint[fieldName] = field.related_model.objects.get(pk=self.get_argument(fieldName))
             else:
                 newDataPoint[fieldName] = self.get_body_argument(fieldName)
+                if newDataPoint[fieldName] == 'true': newDataPoint[fieldName] = True
+                if newDataPoint[fieldName] == 'false': newDataPoint[fieldName] = False
+        logging.info(newDataPoint)
         TimeSeriesDataPoint(**newDataPoint).save()
 
 class TimeSeriesIdentifyHandler(tornado.web.RequestHandler):

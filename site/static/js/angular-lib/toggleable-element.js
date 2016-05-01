@@ -1,4 +1,4 @@
-define(['angularAMD','timeseries'],function(angularAMD){
+define(['angularAMD','moment','timeseries'],function(angularAMD,moment){
 	angularAMD
 	.directive('toggleableElement', ['timeSeriesUpdater', function(timeSeriesUpdater) {
 	  return {
@@ -16,17 +16,17 @@ define(['angularAMD','timeseries'],function(angularAMD){
 	    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorName + "Override");
 	    	
 	    	//status setters
-	    	$scope.toggleElementStatus = function(){
-	        	$scope.setElementStatus(!$scope.elementStatus.latest);
-	    	};
+	    	$scope.toggleElementStatus = function(){$scope.setElementStatus(!$scope.elementStatus.latest);};
 	    	$scope.setElementStatus = function(statusValue){
 	    		function __setElementStatus(statusValue){
-		    		$.ajax({
+	    			var now = moment().toISOString();
+	    			$.ajax({
 		    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
 		    			data: $.param({
 			    			recipe_instance: $scope.recipeInstance,
-			    			sensor: $scope.sensor,
-			    			value: statusValue
+			    			sensor: $scope.elementStatus.sensor,
+			    			value: statusValue,
+			    			time: now,
 			    		})
 			    	});
 		    	}
@@ -40,17 +40,17 @@ define(['angularAMD','timeseries'],function(angularAMD){
 	    	
 	    	
 	    	//override setters
-	    	$scope.toggleElementOverride = function(callback){
-	    		$scope.setElementOverride(!$scope.elementOverride,callback);
-	    	};
-	    	$scope.setElementOverride = function(overrideValue){
+	    	$scope.toggleElementOverride = function(callback){$scope.setElementOverride(!$scope.elementOverride.latest,callback);};
+	    	$scope.setElementOverride = function(overrideValue,callback){
+	    		var now = moment().toISOString();
 	    		$.ajax({
 	    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
 	    			data: $.param({
 	        			recipe_instance: $scope.recipeInstance,
-	        			sensor: $scope.sensor,
-	        			value: overrideValue
-	        		}), success: function(){if (callback) callback();}
+	        			sensor: $scope.elementOverride.sensor,
+	        			value: overrideValue,
+	        			time: now,
+	        		}), success: function(){ if (callback) callback(); }
 	        	});
 	    	}
 	    }

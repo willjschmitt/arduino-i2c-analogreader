@@ -25,7 +25,7 @@ requirejs.config({
 		"datatables.net":       "../vendor/DataTables/js/jquery.dataTables.min",
 		"bootstrap_dataTables": "../vendor/DataTables/js/dataTables.bootstrap.min",
 		"jquery_fullscreen":    "../vendor/fullscreen/jquery.fullscreen-min",
-		"moment":               "../vendor/fullcalendar/moment.min",
+		"moment":               "third-party/moment",
 		"fullcalendar":         "../vendor/fullcalendar/fullcalendar.min",
 		"sparkline":            "../vendor/sparkline/jquery.sparkline.min",
 		"peity":                "../vendor/peity/jquery.peity.min",
@@ -55,7 +55,7 @@ requirejs.config({
 		"bemat-demo-dashboard":"bemat/bemat-admin-demo-dashboard",
         
 		//core deps
-        'jquery':    "lib/jquery-1.10.2",
+        'jquery':    "lib/jquery-1.12.3.min",
 		'jquery-ui': "lib/jquery-ui.min",
 		'bootstrap': "lib/bootstrap.min",
 		'modernizr': "lib/modernizr-2.6.2-respond-1.1.0.min",

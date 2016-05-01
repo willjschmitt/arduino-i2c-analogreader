@@ -1,7 +1,7 @@
 define(['angularAMD','underscore','jquery',
            "prettify","perfect-scrollbar","icheck","bootstrap-select",
-           "datatables.net","bootstrap_dataTables","jquery_fullscreen",
-           "moment","fullcalendar","sparkline","peity","chartist","summernote",
+           "datatables.net","jquery_fullscreen",//"bootstrap_dataTables",
+           "peity","moment",//"fullcalendar","sparkline","chartist","summernote",
            "nvd3",
            //"ckeditor","wysihtml5",
            
@@ -43,7 +43,7 @@ define(['angularAMD','underscore','jquery',
 		//update the pie chart dial color class based on the value
 		$interval(function(){
 			$("#dutycycledial").simplePieChart("set",$scope.boilKettleDutyCycle.latest*100.);
-			var colorClasses = {
+			var colorClasses = {//maps a range to color for the dial
 				'cc-spc-primary':{min:0.,max:0.0},
 				'cc-spc-success':{min:0.0,max:0.5},
 				'cc-spc-info':{min:0.5,max:0.75},
@@ -141,7 +141,7 @@ define(['angularAMD','underscore','jquery',
 			return $scope.chart;
 		}
 		nv.addGraph(updateChart);
-		$interval(updateChart,1000.);//replot every second rather than everytime we get new data so we arent plotting all the time
+		$interval(updateChart,5000.);//replot every second rather than everytime we get new data so we arent plotting all the time
 	}]);
 	//angular.module('toggleableElementModule', []);
 	return angularAMD.bootstrap(app);

@@ -16,10 +16,16 @@ class RecipeInstance(models.Model):
 
 class Asset(models.Model):
     name=models.CharField(max_length=64)
+    
+    def __unicode__(self):
+        return u"{}".format(self.name)
 
 class AssetSensor(models.Model):
     name=models.CharField(max_length=64)
     asset = models.ForeignKey(Asset)
+    
+    def __unicode__(self):
+        return u"{}-{}".format(self.asset,self.name)
     
 class HeatedVessel(Asset):
     brewery = models.ForeignKey(Brewery)
