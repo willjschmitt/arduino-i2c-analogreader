@@ -63,6 +63,7 @@ requirejs.config({
 		//directives
 		'timeseries': "angular-lib/timeseries",
 		"toggleable-element": "angular-lib/toggleable-element",
+		'value-card':"angular-lib/value-card",
 		
     },
     shim : {

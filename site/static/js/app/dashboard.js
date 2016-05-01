@@ -12,7 +12,7 @@ define(['angularAMD','underscore','jquery',
            
            "jquery-ui","bootstrap","modernizr",
            
-           'timeseries',"toggleable-element",
+           'timeseries',"toggleable-element",'value-card',
     ],function(angularAMD,_,$){
 	var app = angular.module('dashboard', [])
 	.controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
@@ -77,11 +77,7 @@ define(['angularAMD','underscore','jquery',
 		    {name:"Measure Post-Boil Gravity"},
 		    {name:"Rack to Fermenters"},
 		    {name:"Clean Boil Kettle and Chiller"},	    
-		]
-		
-		//give us all the little line things for the little cards
-		$(".peity-line").peity("line",{height: 28,width: 64});
-		
+		];		
 		
 		$.toasts("add",{msg: "Welcome to Joulia!"});
 		$.snackbar("add",{
