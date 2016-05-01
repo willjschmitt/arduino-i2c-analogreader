@@ -7,14 +7,13 @@ define(['angularAMD','timeseries'],function(angularAMD){
 	    scope: {
 	    	name:"=",
 	    	recipeInstance: "=",
-	    	sensor: "=",
-	    	sensorOverride: "=",
+	    	sensorName: "=",
 	    },
 	    templateUrl: 'static/html/angular-directives/toggleable-element.html',
 	    link: function ($scope) {
 	    	//subscribe to value and override 
-	    	$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
-	    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
+	    	$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorName);
+	    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorName + "Override");
 	    	
 	    	//status setters
 	    	$scope.toggleElementStatus = function(){

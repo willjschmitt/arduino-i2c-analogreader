@@ -3,7 +3,7 @@ define(['angularAMD'],function(angularAMD){
 	.service('timeSeriesSocket',function(){
 		//message queue lets us queue up items while the socket is not currently open
 		this._msgqueue = [];
-		this._flushqueue = function(){ for (msg in this._msgqueue){this._socket.send(JSON.stringify(this._msgqueue[msg]))}; }
+		this._flushqueue = function(){ for (msg in this._msgqueue){this._socket.send(JSON.stringify(this._msgqueue[msg]))}; this._msgqueue = []; }
 		
 		//handle the fundamentals of creating and managing the websocket
 		this._isopen=false;
@@ -13,7 +13,7 @@ define(['angularAMD'],function(angularAMD){
 		}.bind(this);
 		this._socket.onmessage = function(msg){
 			var parsed = JSON.parse(msg.data);
-			this._subscribers[parsed.name].newData([parsed]);
+			this._subscribers[parsed.sensor].newData([parsed]);
 		}.bind(this);
 		this._socket.onclose = function(){
 	  		this._isopen=false;
@@ -22,13 +22,17 @@ define(['angularAMD'],function(angularAMD){
 		//entry point for subscriptions to initiate the subscription
 		this._subscribers = {};
 		this.subscribe = function(subscriber){
-			this._subscribers[subscriber.name] = subscriber;
-			this._msgqueue.push({
-				recipe_instance: subscriber.recipe_instance,
-				name: subscriber.name,
-				subscribe: true
+			var self = this;
+			$.post( "live/timeseries/identify/",{recipe_instance:1,name:subscriber.name}, function( data ) {
+				subscriber.sensor = data.sensor;
+				self._subscribers[subscriber.sensor] = subscriber;
+				self._msgqueue.push({
+					recipe_instance: subscriber.recipe_instance,
+					sensor: subscriber.sensor,
+					subscribe: true
+				});
+				if (self._isopen) self._flushqueue();
 			});
-			if (this._isopen) this._flushqueue();
 		};
 	})
 	.factory('timeSeriesUpdater',['timeSeriesSocket',function(timeSeriesSocket){
