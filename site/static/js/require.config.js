@@ -61,7 +61,8 @@ requirejs.config({
 		'modernizr': "lib/modernizr-2.6.2-respond-1.1.0.min",
 		
 		//directives
-		"toggleable-element": "angular-directives/toggleable-element",
+		'timeseries': "angular-lib/timeseries",
+		"toggleable-element": "angular-lib/toggleable-element",
 		
     },
     shim : {

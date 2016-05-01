@@ -12,64 +12,9 @@ define(['angularAMD','underscore','jquery',
            
            "jquery-ui","bootstrap","modernizr",
            
-           //"toggleable-element",
+           'timeseries',"toggleable-element",
     ],function(angularAMD,_,$){
 	var app = angular.module('dashboard', [])
-	.service('timeSeriesSocket',function(){
-		//message queue lets us queue up items while the socket is not currently open
-		this._msgqueue = [];
-		this._flushqueue = function(){ for (msg in this._msgqueue){this._socket.send(JSON.stringify(this._msgqueue[msg]))}; }
-		
-		//handle the fundamentals of creating and managing the websocket
-		this._isopen=false;
-		this._socket = new WebSocket("ws://localhost:8888/live/timeseries/socket/");
-		this._socket.onopen = function(){
-			this._isopen = true; this._flushqueue();
-		}.bind(this);
-		this._socket.onmessage = function(msg){
-			var parsed = JSON.parse(msg.data);
-			this._subscribers[parsed.name].newData([parsed]);
-		}.bind(this);
-		this._socket.onclose = function(){
-	  		this._isopen=false;
-		}.bind(this);
-		
-		//entry point for subscriptions to initiate the subscription
-		this._subscribers = {};
-		this.subscribe = function(subscriber){
-			this._subscribers[subscriber.name] = subscriber;
-			this._msgqueue.push({
-				recipe_instance: subscriber.recipe_instance,
-				name: subscriber.name,
-				subscribe: true
-			});
-			if (this._isopen) this._flushqueue();
-		};
-	})
-	.factory('timeSeriesUpdater',['timeSeriesSocket',function(timeSeriesSocket){
-		var service = function(recipe_instance,name){
-			this.recipe_instance = recipe_instance;
-			this.name = name;
-			
-			this.errorSleepTime = 500;
-			this.cursor = null;
-			
-			this.dataPoints = [];
-			
-			var self = this;
-			timeSeriesSocket.subscribe(self)
-		}
-	
-		service.prototype.newData = function(dataPointsIn) {
-		    for (var i = 0; i < dataPointsIn.length; i++) {
-		    	var dataPoint = dataPointsIn[i];
-		    	this.dataPoints.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
-		    	this.latest = parseFloat(dataPoint.value);
-		    }
-		};
-	    
-	    return service;
-	}])
 	.controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
 		function getCookie(name) {
 		    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
@@ -208,63 +153,6 @@ define(['angularAMD','underscore','jquery',
 		}
 		nv.addGraph(updateChart);
 		$interval(updateChart,1000.);//replot every second rather than everytime we get new data so we arent plotting all the time
-	}])
-	.directive('toggleableElement', ['timeSeriesUpdater', function(timeSeriesUpdater) {
-	  return {
-	    restrict: 'E',
-	    transclude: true,
-	    scope: {
-	    	name:"=",
-	    	recipeInstance: "=",
-	    	sensor: "=",
-	    	sensorOverride: "=",
-	    },
-	    templateUrl: 'static/html/angular-directives/toggleable-element.html',
-	    link: function ($scope) {
-	    	//subscribe to value and override 
-	    	$scope.elementOverride = new timeSeriesUpdater($scope.recipeInstance,$scope.sensorOverride);
-	    	$scope.elementStatus = new timeSeriesUpdater($scope.recipeInstance,$scope.sensor);
-	    	
-	    	//status setters
-	    	$scope.toggleElementStatus = function(){
-	        	$scope.setElementStatus(!$scope.elementStatus.latest);
-	    	};
-	    	$scope.setElementStatus = function(statusValue){
-	    		function __setElementStatus(statusValue){
-		    		$.ajax({
-		    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
-		    			data: $.param({
-			    			recipe_instance: $scope.recipeInstance,
-			    			sensor: $scope.sensor,
-			    			value: statusValue
-			    		})
-			    	});
-		    	}
-	    		
-	    		//make sure we have the override set
-	    		if (!$scope.elementOverride.latest)
-	    			$scope.toggleElementOverride(function(){__setElementStatus(statusValue);});
-	    		else
-	    			__setElementStatus(statusValue);
-	    	};
-	    	
-	    	
-	    	//override setters
-	    	$scope.toggleElementOverride = function(callback){
-	    		$scope.setElementOverride(!$scope.elementOverride,callback);
-	    	};
-	    	$scope.setElementOverride = function(overrideValue){
-	    		$.ajax({
-	    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
-	    			data: $.param({
-	        			recipe_instance: $scope.recipeInstance,
-	        			sensor: $scope.sensor,
-	        			value: overrideValue
-	        		}), success: function(){if (callback) callback();}
-	        	});
-	    	}
-	    }
-	  };
 	}]);
 	//angular.module('toggleableElementModule', []);
 	return angularAMD.bootstrap(app);

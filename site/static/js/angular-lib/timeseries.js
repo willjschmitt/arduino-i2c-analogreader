@@ -1,0 +1,58 @@
+define(['angularAMD'],function(angularAMD){
+	angularAMD
+	.service('timeSeriesSocket',function(){
+		//message queue lets us queue up items while the socket is not currently open
+		this._msgqueue = [];
+		this._flushqueue = function(){ for (msg in this._msgqueue){this._socket.send(JSON.stringify(this._msgqueue[msg]))}; }
+		
+		//handle the fundamentals of creating and managing the websocket
+		this._isopen=false;
+		this._socket = new WebSocket("ws://localhost:8888/live/timeseries/socket/");
+		this._socket.onopen = function(){
+			this._isopen = true; this._flushqueue();
+		}.bind(this);
+		this._socket.onmessage = function(msg){
+			var parsed = JSON.parse(msg.data);
+			this._subscribers[parsed.name].newData([parsed]);
+		}.bind(this);
+		this._socket.onclose = function(){
+	  		this._isopen=false;
+		}.bind(this);
+		
+		//entry point for subscriptions to initiate the subscription
+		this._subscribers = {};
+		this.subscribe = function(subscriber){
+			this._subscribers[subscriber.name] = subscriber;
+			this._msgqueue.push({
+				recipe_instance: subscriber.recipe_instance,
+				name: subscriber.name,
+				subscribe: true
+			});
+			if (this._isopen) this._flushqueue();
+		};
+	})
+	.factory('timeSeriesUpdater',['timeSeriesSocket',function(timeSeriesSocket){
+		var service = function(recipe_instance,name){
+			this.recipe_instance = recipe_instance;
+			this.name = name;
+			
+			this.errorSleepTime = 500;
+			this.cursor = null;
+			
+			this.dataPoints = [];
+			
+			var self = this;
+			timeSeriesSocket.subscribe(self)
+		}
+	
+		service.prototype.newData = function(dataPointsIn) {
+		    for (var i = 0; i < dataPointsIn.length; i++) {
+		    	var dataPoint = dataPointsIn[i];
+		    	this.dataPoints.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
+		    	this.latest = parseFloat(dataPoint.value);
+		    }
+		};
+	    
+	    return service;
+	}]);
+});
