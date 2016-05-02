@@ -1,18 +1,17 @@
 define(['angularAMD','underscore','jquery',
            "prettify","perfect-scrollbar","icheck","bootstrap-select",
-           "datatables.net","jquery_fullscreen",//"bootstrap_dataTables",
-           "peity","moment",//"fullcalendar","sparkline","chartist","summernote",
+           "datatables.net","jquery_fullscreen",
+           "moment",
            "nvd3",
-           //"ckeditor","wysihtml5",
            
            "materialRipple","snackbar","toasts","speedDial","circularProgress",
            "linearProgress","subheader","simplePieChart",
            
-           "bemat-common",//"bemat-demo",//"bemat-demo-chartist","bemat-demo-dashboard",
+           "bemat-common",
            
            "jquery-ui","bootstrap","modernizr",
            
-           'timeseries',"toggleable-element",'value-card',
+           'timeseries',"toggleable-element",'value-card','dial',
     ],function(angularAMD,_,$){
 	var app = angular.module('dashboard', [])
 	.controller('dashboardController',['$scope','$timeout','$interval','timeSeriesUpdater',function($scope,$timeout,$interval,timeSeriesUpdater){
@@ -40,22 +39,7 @@ define(['angularAMD','underscore','jquery',
 		$scope.dataPoints.push({'key':'Mash Actual',values:$scope.mashTemperatureActual.dataPoints});
 		$scope.dataPoints.push({'key':'Mash Set Point','values':$scope.mashTemperatureSetPoint.dataPoints});
 	
-		//update the pie chart dial color class based on the value
-		$interval(function(){
-			$("#dutycycledial").simplePieChart("set",$scope.boilKettleDutyCycle.latest*100.);
-			var colorClasses = {//maps a range to color for the dial
-				'cc-spc-primary':{min:0.,max:0.0},
-				'cc-spc-success':{min:0.0,max:0.5},
-				'cc-spc-info':{min:0.5,max:0.75},
-				'cc-spc-warning':{min:0.75,max:0.90},
-				'cc-spc-danger':{min:0.90,max:1.0},
-			};
-			$.each(colorClasses,function(name,details){
-				$("#dutycycledial").removeClass(name);
-				if ($scope.boilKettleDutyCycle.latest > details.min && $scope.boilKettleDutyCycle.latest <= details.max)
-					$("#dutycycledial").addClass(name);
-			});
-		},500.);
+		
 		
 		
 		//overridable statuses - sensor ids for the child elements

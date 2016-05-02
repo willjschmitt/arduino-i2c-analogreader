@@ -1,6 +1,6 @@
 define(['angularAMD',"peity"],function(angularAMD){
 	angularAMD
-	.directive('valueCard', function(timeSeriesUpdater) {
+	.directive('valueCard', function() {
 		return {
 		    restrict: 'E',
 		    transclude: true,

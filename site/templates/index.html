@@ -111,19 +111,7 @@
 								<div class="row"><div class="col-sm-12"><value-card title="'Boil Kettle Temperature'" value="boilTemperatureActual.latest" value-alternate="boilTemperatureSetPoint.latest" units="'&deg;F'"/></div></div>
 								<div class="row"><div class="col-sm-12"><value-card title="'Mash Tun Temperature'" value="mashTemperatureActual.latest" value-alternate="mashTemperatureSetPoint.latest" units="'&deg;F'"/></div></div>							
 							</div>
-							<div class="col-lg-3 col-sm-6">
-								<div class="panel panel-default">
-									<div class="panel-heading">
-										<header>Power</header>
-									</div>
-									<div class="panel-body no-top-padding">
-										<div class="layout layout-align-center-vertical">
-											<div id="dutycycledial" class="bemat-pie-chart height-5" data-toggle="simple-pie-chart" data-percent="0"  data-size="250" data-type="primary"></div>
-										</div>
-										
-									</div>
-								</div>
-							</div>
+							<div class="col-lg-3 col-sm-6"><dial title="'Power'" value="boilKettleDutyCycle.latest" /></div>
 						</div>
 						<div class="row">
 							<div class="col-lg-3 col-xs-6"><toggleable-element name="'Heating Element Status'" recipe-instance="recipeInstance" sensor-name="'boilKettle__heatingElementStatus'"/></div>
