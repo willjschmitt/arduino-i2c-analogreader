@@ -32,6 +32,25 @@ define(['angularAMD','underscore','jquery',
 		$scope.systemEnergy = new timeSeriesUpdater($scope.recipeInstance,'systemEnergy');
 		$scope.systemEnergyCost = new timeSeriesUpdater($scope.recipeInstance,'systemEnergyCost');
 		
+		var statuses = [
+		    "System is currently offline.",
+		    "Heating water for strike.",
+		    "Pumping water to mash tun for strike.",
+		    "Stabilizing hot liquor tun water temperature.",
+		    "Mashing grain.",
+		    "Raising hot liquor tun to 170&deg;F for mashout.",
+		    "Mashout. Recirculating at 170&deg;F.",
+		    "Preparing for sparge. Waiting for reconfiguration. Ensure output of HLT is configured to pump to Mash Tun.",
+		    "Sparging. Pumping hot liquor into mash tun.",
+		    "Preparing for boil. Waiting for reconfiguration. Ensure sparged liquid is configured to pump into boil kettle and boil kettle is empty.",
+		    "Preheating boil. Raising temperature to boil temperature.",
+		    "Cooling boil kettle. Make sure the cooling setup is in place.",
+		    "Pumping cooled wort into fermeneter.",
+		];
+		$scope.currentStatus = {latest: 1};
+		$scope.currentStatusText = statuses[$scope.currentStatus.latest];
+		$scope.nextStatusText = statuses[$scope.currentStatus.latest + 1];
+		
 		//add all the relevant time series to the chart data.
 		$scope.dataPoints = [];
 		$scope.dataPoints.push({'key':'Boil Actual',values:$scope.boilTemperatureActual.dataPoints});

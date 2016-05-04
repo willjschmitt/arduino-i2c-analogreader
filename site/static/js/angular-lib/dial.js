@@ -11,6 +11,7 @@ define(['angularAMD',"simplePieChart"],function(angularAMD){
 		    templateUrl: 'static/html/angular-directives/dial.html',
 		    link: function ($scope,$element) {
 		    	//update the pie chart dial color class based on the value
+		    	//TODO: get duration to work
 		    	$element.find(".bemat-pie-chart").simplePieChart();
 		    	$interval(function(){
 					$element.find(".bemat-pie-chart").simplePieChart("set",($scope.value*100.).toPrecision(2));

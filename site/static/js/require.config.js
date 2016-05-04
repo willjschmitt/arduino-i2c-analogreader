@@ -42,7 +42,7 @@ requirejs.config({
 		"circularProgress": "../vendor/circularProgress/jquery.circularProgress",
 		"linearProgress":   "../vendor/linearProgress/jquery.linearProgress",
 		"subheader":        "../vendor/subheader/jquery.subheader",
-		"simplePieChart":   "../vendor/simplePieChart/jquery.simplePieChart",
+		"simplePieChart":   "lib/jquery.simplePieChart",//"../vendor/simplePieChart/jquery.simplePieChart",
 		
 		//d3 plugins
 		"d3": "../vendor/d3/d3.v3",
