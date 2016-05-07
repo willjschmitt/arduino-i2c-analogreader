@@ -69,12 +69,8 @@ class heatedVessel(temperatureMonitoredVessel):
         
         self.recalculateGains()
         
-    def turnOff(self):
-        self.elementStatus = False
-        self.pin.value = self.enabled
-    def turnOn(self):
-        self.elementStatus = True
-        self.pin.value = self.enabled
+    def turnOff(self): self.elementStatus = self.pin.value = False
+    def turnOn(self):  self.elementStatus = self.pin.value = True
     
     def setLiquidLevel(self,volume):
         self.volume = volume
