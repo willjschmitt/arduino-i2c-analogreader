@@ -13,11 +13,50 @@ import requests
 
 from controls.settings import host
 
+@gen.coroutine #allows the websocket to be yielded
+class subscribableVariable(object):
+    '''
+    classdocs
+    '''
+    dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
+
+    def __init__(self, instance, varName, sensorName,recipeInstance):
+        '''
+        Constructor
+        '''
+        self.instance = instance
+        self.varName = varName
+        
+        #add new subscription to class vars
+        self.subscribe(sensorName, recipeInstance, 'value')
+        
+    @property
+    def value(self): return getattr(self.instance,self.varName)
+    @value.setter
+    def value(self,value): setattr(self.instance,self.varName,value)
+        
+    def subscribe(self,name,recipeInstance,type='value'):
+        if ((name,recipeInstance)) not in self.subscribers:
+            r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
+            idSensor = r.json()['sensor']
+            self.subscribers[(idSensor,recipeInstance)] = (self,type)
+            self.websocket.write_message(json.dumps({'recipe_instance':recipeInstance,'sensor':idSensor,'subscribe':True}))
+        
+    @classmethod
+    def on_message(cls,response):
+        data = json.loads(response)
+        subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
+        subscriber[0].value = data['value']
+    websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",on_message_callback=on_message)
+    
+    subscribers = {}
+
+@gen.coroutine #allows the websocket to be yielded
 class overridableVariable(object):
     '''
     classdocs
     '''
-
+    dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
     def __init__(self, sensorName,recipeInstance):
         '''
         Constructor
@@ -25,18 +64,14 @@ class overridableVariable(object):
         self.value = None
         self.overridden = False
         
-        print(host)
-        self.dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
-        
         #add new subscription to class vars
         self.subscribe(sensorName, recipeInstance, 'value')
         self.subscribe(sensorName+"Override", recipeInstance, 'override')
-            
+    
     def subscribe(self,name,recipeInstance,type='value'):
         if ((name,recipeInstance)) not in self.subscribers:
             r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
             idSensor = r.json()['sensor']
-            self.sensorMap['name'] = r.json()['sensor']
             self.subscribers[(idSensor,recipeInstance)] = (self,type)
             self.websocket.write_message(json.dumps({'recipe_instance':recipeInstance,'sensor':idSensor,'subscribe':True}))
         
@@ -48,6 +83,6 @@ class overridableVariable(object):
             subscriber[0].value = data['value']
         elif subscriber[1] == 'override':
             subscriber[0].overridden = data['value']
-            
     websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",on_message_callback=on_message)
+    
     subscribers = {}

@@ -21,7 +21,7 @@ import logging
 from controls.settings import host
 
 import functools
-from controls.utils import overridableVariable
+from controls.utils import subscribableVariable
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('.')
     return setattr(rgetattr(obj, pre) if pre else obj, post, val)
@@ -64,6 +64,7 @@ class brewery(object):
         self.state.addState(stateCool)
         self.state.addState(statePumpout)
         self.state.changeState('statePrestart')
+        self.stateWatcher = subscribableVariable(self.state, 'id', 'state',self.recipeInstance) #subscribes to remote var
     
         #initialize everything
         self.boilKettle = heatedVessel(rating=5000.,volume=5.,rtdParams=[0,0.385,100.0,5.0,0.94,-16.0,10.],pin=0)
@@ -129,15 +130,15 @@ class brewery(object):
         sampleTime = str(datetime.datetime.now())
         
         sensors = [
-            {'value':self.boilKettle.temperature,'name':'boilKettle__temperature'},
-            {'value':self.boilKettle.temperatureSetPoint,'name':'boilKettle__temperatureSetPoint'},
-            {'value':self.mashTun.temperature,'name':'mashTun__temperature'},
-            {'value':self.mashTun.temperatureSetPoint,'name':'mashTun__temperatureSetPoint'},
-            {'value':self.boilKettle.dutyCycle,'name':'boilKettle__dutyCycle'},
-            {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'name':'boilKettle__power'},
-            {'value':self.systemEnergy,'name':'systemEnergy'},
-            {'value':self.systemEnergyCost,'name':'systemEnergyCost'},
-            {'value':self.state.id,'name':'state'},
+#             {'value':self.boilKettle.temperature,'name':'boilKettle__temperature'},
+#             {'value':self.boilKettle.temperatureSetPoint,'name':'boilKettle__temperatureSetPoint'},
+#             {'value':self.mashTun.temperature,'name':'mashTun__temperature'},
+#             {'value':self.mashTun.temperatureSetPoint,'name':'mashTun__temperatureSetPoint'},
+#             {'value':self.boilKettle.dutyCycle,'name':'boilKettle__dutyCycle'},
+#             {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'name':'boilKettle__power'},
+#             {'value':self.systemEnergy,'name':'systemEnergy'},
+#             {'value':self.systemEnergyCost,'name':'systemEnergyCost'},
+#             {'value':self.state.id,'name':'state'},
         ]
         
         for sensor in sensors:
