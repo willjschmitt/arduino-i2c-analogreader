@@ -31,3 +31,8 @@ class stateMachine(object):
                     if state.__name__ == stateRequested: self.state = state
                 else:
                     if state == stateRequested: self.state = state
+    
+    @property
+    def id(self): return self.states.index(self.state)
+    @id.setter
+    def id(self,value): self.state = self.states[value]
