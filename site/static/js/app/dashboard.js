@@ -31,6 +31,7 @@ define(['angularAMD','underscore','jquery',
 		$scope.boilKettlePower = new timeSeriesUpdater($scope.recipeInstance,'boilKettle__power');
 		$scope.systemEnergy = new timeSeriesUpdater($scope.recipeInstance,'systemEnergy');
 		$scope.systemEnergyCost = new timeSeriesUpdater($scope.recipeInstance,'systemEnergyCost');
+		$scope.currentStatus = new timeSeriesUpdater($scope.recipeInstance,'state');
 		
 		var statuses = [
 		    "System is currently offline.",
@@ -47,9 +48,9 @@ define(['angularAMD','underscore','jquery',
 		    "Cooling boil kettle. Make sure the cooling setup is in place.",
 		    "Pumping cooled wort into fermeneter.",
 		];
-		$scope.currentStatus = {latest: 1};
 		$scope.currentStatusText = statuses[$scope.currentStatus.latest];
 		$scope.nextStatusText = statuses[$scope.currentStatus.latest + 1];
+		$scope.adjustState = function(amount){$scope.currentStatus.set($scope.currentStatus.latest + amount);};
 		
 		//add all the relevant time series to the chart data.
 		$scope.dataPoints = [];

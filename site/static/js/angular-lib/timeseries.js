@@ -1,4 +1,4 @@
-define(['angularAMD'],function(angularAMD){
+define(['angularAMD','moment'],function(angularAMD,moment){
 	angularAMD
 	.service('timeSeriesSocket',function(){
 		//message queue lets us queue up items while the socket is not currently open
@@ -23,7 +23,7 @@ define(['angularAMD'],function(angularAMD){
 		this._subscribers = {};
 		this.subscribe = function(subscriber){
 			var self = this;
-			$.post( "live/timeseries/identify/",{recipe_instance:1,name:subscriber.name}, function( data ) {
+			$.post( "live/timeseries/identify/",{recipe_instance:subscriber.recipe_instance,name:subscriber.name}, function( data ) {
 				subscriber.sensor = data.sensor;
 				self._subscribers[subscriber.sensor] = subscriber;
 				self._msgqueue.push({
@@ -34,6 +34,8 @@ define(['angularAMD'],function(angularAMD){
 				if (self._isopen) self._flushqueue();
 			});
 		};
+		//TODO: add websocket sending of data
+		/*this.send = function(subscriber,value){}*/
 	})
 	.factory('timeSeriesUpdater',['timeSeriesSocket',function(timeSeriesSocket){
 		var service = function(recipe_instance,name){
@@ -44,9 +46,11 @@ define(['angularAMD'],function(angularAMD){
 			this.cursor = null;
 			
 			this.dataPoints = [];
+			this.latest = null;
 			
 			var self = this;
-			timeSeriesSocket.subscribe(self)
+			this.timeSeriesSocket = timeSeriesSocket;
+			this.timeSeriesSocket.subscribe(self);
 		}
 	
 		service.prototype.newData = function(dataPointsIn) {
@@ -55,6 +59,19 @@ define(['angularAMD'],function(angularAMD){
 		    	this.dataPoints.push([new Date(dataPoint.time),parseFloat(dataPoint.value)]);
 		    	this.latest = dataPoint.value;//parseFloat(dataPoint.value);
 		    }
+		};
+		
+		service.prototype.set = function(value){
+			var now = moment().toISOString();
+			$.ajax({
+    			url: "/live/timeseries/new/", type: "POST", dataType: "text",
+    			data: $.param({
+	    			recipe_instance: this.recipe_instance,
+	    			sensor: this.sensor,
+	    			value: value,
+	    			time: now,
+	    		})
+	    	});
 		};
 	    
 	    return service;

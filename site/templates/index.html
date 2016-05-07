@@ -91,7 +91,7 @@
 							<div class="col-xs-12">
 								<div class="panel panel-default">
 									<div class="panel-heading">
-										<header>Status</header>
+										<header>Status ({{"{{"}}currentStatus.latest}})</header>
 									</div>
 									<div class="panel-body no-top-padding">
 										<div class="row">
@@ -103,7 +103,8 @@
 												<dial ng-if="timerActive" title="'Time Left'" value="boilKettleDutyCycle.latest" />
 											</div>
 											<div class="col-xs-4">
-												Actions
+												<button class="btn btn-lg btn-info"    ng-click="adjustState(-1)">Previous</button>
+												<button class="btn btn-lg btn-success" ng-click="adjustState(+1)">Next</button>
 											</div>
 										</div>
 									</div>
