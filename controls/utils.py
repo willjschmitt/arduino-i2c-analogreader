@@ -14,6 +14,7 @@ import requests
 import logging
 import datetime
 import functools
+import pytz
 
 from controls.settings import host
 
@@ -124,7 +125,7 @@ class dataStreamer(object):
             self.timeOutCounter -= 1
         else:
             #post temperature updates to server        
-            sampleTime = str(datetime.datetime.now())
+            sampleTime = datetime.datetime.now(tz=pytz.utc).isoformat()
             
             for sensorName,sensor in self.sensorMap.iteritems():
                 #get the sensor ID if we dont have it already
