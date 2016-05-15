@@ -9,6 +9,8 @@ Created on Apr 3, 2016
 import sched,time
 import datetime
 
+from controls.utils import dataStreamer
+
 from vessels import heatedVessel,heatExchangedVessel
 from simplePump import simplePump
 
@@ -22,12 +24,6 @@ from controls.settings import host
 
 import functools
 from controls.utils import subscribableVariable
-def rsetattr(obj, attr, val):
-    pre, _, post = attr.rpartition('.')
-    return setattr(rgetattr(obj, pre) if pre else obj, post, val)
-
-def rgetattr(obj, attr):
-    return functools.reduce(getattr, [obj]+attr.split('.'))
 
 class brewery(object):
     '''
@@ -41,10 +37,18 @@ class brewery(object):
         logging.info('Initializing Brewery object')
         self.scheduler = sched.scheduler(time.time,time.sleep)
         
-        self.dataPostService = "http:" + host + "/live/timeseries/new/"
-        self.dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
         self.recipeInstance = 1
-        self.sensorMap = {}
+        
+        self.dataStreamer = dataStreamer(self,self.recipeInstance)
+        self.dataStreamer.register('boilKettle__temperature')
+        self.dataStreamer.register('boilKettle__temperatureSetPoint')
+        self.dataStreamer.register('mashTun__temperature')
+        self.dataStreamer.register('mashTun__temperatureSetPoint')
+        self.dataStreamer.register('boilKettle__dutyCycle')
+        self.dataStreamer.register('boilKettle__power')
+        self.dataStreamer.register('systemEnergy')
+        self.dataStreamer.register('systemEnergyCost')
+        self.dataStreamer.register('state__id','state')
         
         #state machine initialization
         self.state = stateMachine(self)
@@ -119,42 +123,11 @@ class brewery(object):
         self.systemEnergy += (self.boilKettle.dutyCycle*self.boilKettle.rating)*((self.wtime-self.tm1_tz1)/(60.*60.))
         self.systemEnergyCost= self.systemEnergy/1000. * self.energyUnitCost
         
-        self.postData()
+        self.dataStreamer.postData()
         
         #schedule next task 1 event
         self.tm1_tz1 = self.wtime
-        self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
-        
-    def postData(self):
-        #post temperature updates to server        
-        sampleTime = str(datetime.datetime.now())
-        
-        sensors = [
-#             {'value':self.boilKettle.temperature,'name':'boilKettle__temperature'},
-#             {'value':self.boilKettle.temperatureSetPoint,'name':'boilKettle__temperatureSetPoint'},
-#             {'value':self.mashTun.temperature,'name':'mashTun__temperature'},
-#             {'value':self.mashTun.temperatureSetPoint,'name':'mashTun__temperatureSetPoint'},
-#             {'value':self.boilKettle.dutyCycle,'name':'boilKettle__dutyCycle'},
-#             {'value':self.boilKettle.dutyCycle * self.boilKettle.rating,'name':'boilKettle__power'},
-#             {'value':self.systemEnergy,'name':'systemEnergy'},
-#             {'value':self.systemEnergyCost,'name':'systemEnergyCost'},
-#             {'value':self.state.id,'name':'state'},
-        ]
-        
-        for sensor in sensors:
-            #get the sensor ID if we dont have it already
-            if sensor['name'] not in self.sensorMap:
-                r = requests.post(self.dataIdentifyService,
-                    data={'recipe_instance':self.recipeInstance,'name':sensor['name']}
-                )
-                self.sensorMap['name'] = r.json()['sensor']
-            requests.post(self.dataPostService,
-                data={
-                    'time':sampleTime,'recipe_instance':self.recipeInstance,
-                    'value':sensor['value'],'sensor':self.sensorMap['name']
-                }
-            )
-    
+        self.scheduler.enter(self.tm1Rate, 1, self.task00, ())    
     
 def statePrestart(breweryInstance):
     '''
