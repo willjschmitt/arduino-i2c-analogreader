@@ -141,13 +141,13 @@ class dataStreamer(object):
                         self.timeOutCounter = self.timeOutWait
                         break
                     
-                    self.sensorMap['id'] = r.json()['sensor']
+                    sensor['id'] = r.json()['sensor']
                     
                 #send the data
                 try:
                     r = requests.post(self.dataPostService,
                         data={'time':sampleTime,'recipe_instance':self.recipeInstance,
-                            'value':rgetattr(self.streamingClass,sensor['attr']),'sensor':self.sensorMap['id']
+                            'value':rgetattr(self.streamingClass,sensor['attr']),'sensor':sensor['id']
                         }
                     )
                     r.raise_for_status()

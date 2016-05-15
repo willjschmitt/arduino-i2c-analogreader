@@ -83,6 +83,9 @@ class heatedVessel(temperatureMonitoredVessel):
     def regulate(self):
         self.dutyCycle = self.regulator.calculate(self.temperature,self.temperatureSetPoint)
         
+    @property
+    def power(self): return self.dutyCycle * self.rating
+        
 class heatExchangedVessel(temperatureMonitoredVessel):
     '''
     classdocs
