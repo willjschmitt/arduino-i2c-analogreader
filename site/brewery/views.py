@@ -44,7 +44,9 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
     Core websocket functions
     '''
     def open(self):
+        logging.info("New websocket connection incomming {}".format(self))
         TimeSeriesSocketHandler.waiters.add(self)
+        logging.info("returning {}".format(self))
 
     def on_close(self):
         TimeSeriesSocketHandler.waiters.remove(self)
@@ -54,7 +56,7 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
             
     def on_message(self, message):
         parsedMessage = tornado.escape.json_decode(message)
-        print(parsedMessage)
+        logging.debug('parsed message is {}'.format(parsedMessage))
         #we are subscribing to a 
         if 'subscribe' in parsedMessage:
             self.subscribe(parsedMessage)
@@ -65,6 +67,7 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
     Message helper functions
     '''      
     def subscribe(self,parsedMessage):
+        logging.debug('Subscribing')
         if 'sensor' not in parsedMessage:
             parsedMessage['sensor'] = AssetSensor.objects.get(sensor=parsedMessage['sensor'],asset=1)#TODO: programatically get asset
             
@@ -74,6 +77,7 @@ class TimeSeriesSocketHandler(tornado.websocket.WebSocketHandler):
             TimeSeriesSocketHandler.subscriptions[key].add(self)
     
     def newData(self,parsedMessage):
+        logging.debug('New data')
         fields = ('recipe_instance','sensor','time','value',)
         newDataPoint = {}
         for fieldName in fields:
@@ -140,6 +144,5 @@ class TimeSeriesIdentifyHandler(tornado.web.RequestHandler):
             logging.debug('Creating new asset sensor {} for asset {}'.format(self.get_argument('name'),1))
             sensor = AssetSensor(name=self.get_argument('name'),asset=Asset.objects.get(id=1))#TODO: programatically get asset
             sensor.save()
-        print('sensor',sensor.pk)
         self.write({'sensor':sensor.pk})
         self.finish()

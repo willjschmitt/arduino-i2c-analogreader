@@ -7,23 +7,18 @@ Created on Apr 3, 2016
 #from datetime import time
 
 import sched,time
-import datetime
+from tornado.websocket import websocket_connect
+from tornado import gen
+from tornado import ioloop
 
-from controls.utils import dataStreamer
+from controls.utils import dataStreamer, subscribableVariable
+from controls.dsp import stateMachine
+from controls.settings import host
 
 from vessels import heatedVessel,heatExchangedVessel
 from simplePump import simplePump
 
-from controls.dsp import stateMachine
-
-import requests
-
 import logging
-
-from controls.settings import host
-
-import functools
-from controls.utils import subscribableVariable
 
 class brewery(object):
     '''
@@ -40,15 +35,15 @@ class brewery(object):
         self.recipeInstance = 1
         
         self.dataStreamer = dataStreamer(self,self.recipeInstance)
-        self.dataStreamer.register('boilKettle__temperature')
-        self.dataStreamer.register('boilKettle__temperatureSetPoint')
-        self.dataStreamer.register('mashTun__temperature')
-        self.dataStreamer.register('mashTun__temperatureSetPoint')
-        self.dataStreamer.register('boilKettle__dutyCycle')
-        self.dataStreamer.register('boilKettle__power')
-        self.dataStreamer.register('systemEnergy')
-        self.dataStreamer.register('systemEnergyCost')
-        self.dataStreamer.register('state__id','state')
+#         self.dataStreamer.register('boilKettle__temperature')
+#         self.dataStreamer.register('boilKettle__temperatureSetPoint')
+#         self.dataStreamer.register('mashTun__temperature')
+#         self.dataStreamer.register('mashTun__temperatureSetPoint')
+#         self.dataStreamer.register('boilKettle__dutyCycle')
+#         self.dataStreamer.register('boilKettle__power')
+#         self.dataStreamer.register('systemEnergy')
+#         self.dataStreamer.register('systemEnergyCost')
+#         self.dataStreamer.register('state__id','state')
         
         #state machine initialization
         self.state = stateMachine(self)
@@ -69,6 +64,8 @@ class brewery(object):
         self.state.addState(statePumpout)
         self.state.changeState('statePrestart')
         self.stateWatcher = subscribableVariable(self.state, 'id', 'state',self.recipeInstance) #subscribes to remote var
+    
+#         self.connect()
     
         #initialize everything
         self.boilKettle = heatedVessel(rating=5000.,volume=5.,rtdParams=[0,0.385,100.0,5.0,0.94,-16.0,10.],pin=0)
@@ -98,9 +95,10 @@ class brewery(object):
         self.tm1_tz1 = time.time() 
         self.task00()
         
-        #self.watchedVar = overridableVariable(9,10)
-        
-        self.scheduler.run()
+        a = ioloop.PeriodicCallback(self.task00,self.tm1Rate*1000)
+        a.start()
+        ioloop.IOLoop.current().start()
+#         self.scheduler.run()
         
     def task00(self):
         logging.debug('Evaluating task 00')
@@ -127,7 +125,16 @@ class brewery(object):
         
         #schedule next task 1 event
         self.tm1_tz1 = self.wtime
-        self.scheduler.enter(self.tm1Rate, 1, self.task00, ())    
+#         self.scheduler.enter(self.tm1Rate, 1, self.task00, ())
+    
+#     @gen.coroutine
+#     def connect(self):
+#         logging.debug('lets try {}'.format("ws:" + host + "/live/timeseries/socket/"))
+#         self.conn = yield websocket_connect("ws:" + host + "/live/timeseries/socket/")
+#         logging.debug('here {}'.format(self.conn))
+#         print('bs')
+#         self.conn.write_message({'subscribe':True})
+        
     
 def statePrestart(breweryInstance):
     '''

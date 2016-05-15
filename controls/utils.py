@@ -49,17 +49,18 @@ class subscribableVariable(object):
         
     def subscribe(self,name,recipeInstance,type='value'):
         if ((name,recipeInstance)) not in self.subscribers:
-            print('hi')
+            logging.debug('Subscribing to {}'.format(name))
             r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
             idSensor = r.json()['sensor']
             self.subscribers[(idSensor,recipeInstance)] = (self,type)
-            print('subscribing')
+            logging.debug('Id is {}'.format(idSensor))
             self.websocket.write_message(json.dumps({'recipe_instance':recipeInstance,'sensor':idSensor,'subscribe':True}))
+            logging.debug('Subscribed')
         
     @classmethod
     def on_message(cls,response):
         data = json.loads(response)
-        print(data)
+        logging.debug('websocket sent: {}'.format(data))
         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
         subscriber[0].value = data['value']
     websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",on_message_callback=on_message)
@@ -93,6 +94,7 @@ class overridableVariable(object):
     @classmethod
     def on_message(cls,response):
         data = json.loads(response)
+        logging.debug('websocket sent: {}'.format(data))
         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
         if subscriber[1] == 'value':
             subscriber[0].value = data['value']
