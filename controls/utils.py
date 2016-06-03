@@ -4,9 +4,8 @@ Created on Apr 14, 2016
 @author: William
 '''
 
-from tornado.concurrent import Future
-from tornado.httpclient import AsyncHTTPClient
 from tornado.websocket import websocket_connect
+from tornado.ioloop import IOLoop
 from tornado import gen
 
 import json
@@ -24,6 +23,25 @@ def rsetattr(obj, attr, val):
 
 def rgetattr(obj, attr):
     return functools.reduce(getattr, [obj]+attr.split('__'))
+
+# class EchoWebSocket(tornado.websocket.WebSocketHandler):
+#     def open(self):
+#         print("WebSocket opened")
+# 
+#     def on_message(self, message):
+#         self.write_message(u"You said: " + message)
+# 
+#     def on_close(self):
+#         print("WebSocket closed")
+
+def cbk(*args,**kwargs):
+    print('hello',args,kwargs)
+    
+def on_message(response,*args,**kwargs):
+    data = response# json.loads(response)
+    logging.debug('websocket sent: {}'.format(data))
+#     subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
+#     subscriber[0].value = data['value']
 
 @gen.coroutine #allows the websocket to be yielded
 class subscribableVariable(object):
@@ -52,58 +70,68 @@ class subscribableVariable(object):
             logging.debug('Subscribing to {}'.format(name))
             r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
             idSensor = r.json()['sensor']
+            
+            self.idSensor = idSensor
+            self.recipeInstance = recipeInstance
             self.subscribers[(idSensor,recipeInstance)] = (self,type)
+            
             logging.debug('Id is {}'.format(idSensor))
-            self.websocket.write_message(json.dumps({'recipe_instance':recipeInstance,'sensor':idSensor,'subscribe':True}))
+            io_loop = IOLoop.current()
+            io_loop.add_future(self.websocket, self.write_subscription)
+            
             logging.debug('Subscribed')
-        
-    @classmethod
-    def on_message(cls,response):
-        data = json.loads(response)
-        logging.debug('websocket sent: {}'.format(data))
-        subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
-        subscriber[0].value = data['value']
-    websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",on_message_callback=on_message)
+            
+    def write_subscription(self,*args,**kwargs):
+        print self.websocket
+        self.websocket.write_message(json.dumps({'recipe_instance':self.recipeInstance,'sensor':self.idSensor,'subscribe':True}))
+#     
+#     @classmethod
+#     def on_message(cls,response):
+#         data = json.loads(response)
+#         logging.debug('websocket sent: {}'.format(data))
+#         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
+#         subscriber[0].value = data['value']
+    websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",callback=cbk,on_message_callback=on_message)
     
     subscribers = {}
 
-@gen.coroutine #allows the websocket to be yielded
-class overridableVariable(object):
-    '''
-    classdocs
-    '''
-    dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
-    def __init__(self, sensorName,recipeInstance):
-        '''
-        Constructor
-        '''
-        self.value = None
-        self.overridden = False
-        
-        #add new subscription to class vars
-        self.subscribe(sensorName, recipeInstance, 'value')
-        self.subscribe(sensorName+"Override", recipeInstance, 'override')
-    
-    def subscribe(self,name,recipeInstance,type='value'):
-        if ((name,recipeInstance)) not in self.subscribers:
-            r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
-            idSensor = r.json()['sensor']
-            self.subscribers[(idSensor,recipeInstance)] = (self,type)
-            self.websocket.write_message(json.dumps({'recipe_instance':recipeInstance,'sensor':idSensor,'subscribe':True}))
-        
-    @classmethod
-    def on_message(cls,response):
-        data = json.loads(response)
-        logging.debug('websocket sent: {}'.format(data))
-        subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
-        if subscriber[1] == 'value':
-            subscriber[0].value = data['value']
-        elif subscriber[1] == 'override':
-            subscriber[0].overridden = data['value']
-    websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",on_message_callback=on_message)
-    
-    subscribers = {}
-    
+# @gen.coroutine #allows the websocket to be yielded
+# class overridableVariable(object):
+#     '''
+#     classdocs
+#     '''
+#     dataIdentifyService = "http:" + host + "/live/timeseries/identify/"
+#     def __init__(self, sensorName,recipeInstance):
+#         '''
+#         Constructor
+#         '''
+#         self.value = None
+#         self.overridden = False
+#         
+#         #add new subscription to class vars
+#         self.subscribe(sensorName, recipeInstance, 'value')
+#         self.subscribe(sensorName+"Override", recipeInstance, 'override')
+#     
+#     def subscribe(self,name,recipeInstance,type='value'):
+#         if ((name,recipeInstance)) not in self.subscribers:
+#             r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
+#             idSensor = r.json()['sensor']
+#             self.subscribers[(idSensor,recipeInstance)] = (self,type)
+#             self.websocket.write_message(json.dumps({'recipe_instance':recipeInstance,'sensor':idSensor,'subscribe':True}))
+#         
+#     @classmethod
+#     def on_message(cls,response):
+#         data = json.loads(response)
+#         logging.debug('websocket sent: {}'.format(data))
+#         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
+#         if subscriber[1] == 'value':
+#             subscriber[0].value = data['value']
+#         elif subscriber[1] == 'override':
+#             subscriber[0].overridden = data['value']
+#     websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",on_message_callback=on_message)
+#     
+#     subscribers = {}
+#     
 class dataStreamer(object):
     timeOutWait = 10
     
