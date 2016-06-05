@@ -9,10 +9,10 @@ from brewery import brewing
 # from tornado import ioloop
 from tornado import gen
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 @gen.coroutine
 def main():
-    logging.basicConfig(level=logging.DEBUG)
     brewery = brewing.brewery()
     #ioloop.IOLoop.current().run_sync(brewery)
     
