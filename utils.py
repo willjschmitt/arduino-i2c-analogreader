@@ -15,7 +15,7 @@ import datetime
 import functools
 import pytz
 
-from controls.settings import host
+from settings import host
 
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('__')

@@ -4,7 +4,7 @@ Created on Apr 3, 2016
 @author: William
 '''
 
-from controls.dsp import firstOrderLag
+from dsp import firstOrderLag
 
 class rtdSensor(object):
     '''

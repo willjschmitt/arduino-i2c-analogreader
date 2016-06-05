@@ -4,16 +4,11 @@ Created on Apr 3, 2016
 @author: William
 '''
 
-#from datetime import time
-
 import sched,time
-from tornado.websocket import websocket_connect
-from tornado import gen
 from tornado import ioloop
 
-from controls.utils import dataStreamer, subscribableVariable
-from controls.dsp import stateMachine
-from controls.settings import host
+from utils import dataStreamer, subscribableVariable
+from dsp import stateMachine
 
 from vessels import heatedVessel,heatExchangedVessel
 from simplePump import simplePump

@@ -3,13 +3,12 @@ Created on Apr 5, 2016
 
 @author: William
 '''
-from datetime import time
 
 from gpiocrust import OutputPin
 
-from controls.measurement import rtdSensor
+from measurement import rtdSensor
 
-from controls.dsp import regulator
+from dsp import regulator
 
 class simpleVessel(object):
     '''

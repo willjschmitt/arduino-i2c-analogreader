@@ -4,7 +4,7 @@ Created on Apr 5, 2016
 @author: William
 '''
 
-from controls.brewery import brewing
+from brewery import brewing
 
 # from tornado import ioloop
 from tornado import gen
