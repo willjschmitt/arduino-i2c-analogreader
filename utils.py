@@ -14,6 +14,9 @@ import datetime
 import functools
 import pytz
 
+import sys
+import traceback
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,8 @@ class subscribableVariable(object):
     @property
     def value(self): return getattr(self.instance,self.varName)
     @value.setter
-    def value(self,value): setattr(self.instance,self.varName,value)
+    def value(self,value):
+        setattr(self.instance,self.varName,value)
     
     @gen.coroutine #allows the websocket to be yielded    
     def subscribe(self,name,recipeInstance,var_type='value'):
@@ -74,14 +78,10 @@ class subscribableVariable(object):
     @classmethod        
     def on_message(cls,response,*args,**kwargs):
         if response is not None:
-            try:
-                data = json.loads(response)
-                logger.debug('websocket sent: {}'.format(data))
-                subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
-                subscriber[0].value = data['value']
-            except:
-                logger.error("Got non data {}".format(response))
-            
+            data = json.loads(response)
+            logger.debug('websocket sent: {}'.format(data))
+            subscriber = subscribableVariable.subscribers[(data['sensor'],data['recipe_instance'])]
+            subscriber[0].value = type(subscriber[0].value)(data['value'])            
         else:
             logger.debug('websocket closed')
 
