@@ -23,19 +23,6 @@ def rsetattr(obj, attr, val):
 
 def rgetattr(obj, attr):
     return functools.reduce(getattr, [obj]+attr.split('__'))
-
-# class EchoWebSocket(tornado.websocket.WebSocketHandler):
-#     def open(self):
-#         print("WebSocket opened")
-# 
-#     def on_message(self, message):
-#         self.write_message(u"You said: " + message)
-# 
-#     def on_close(self):
-#         print("WebSocket closed")
-
-def cbk(*args,**kwargs):
-    print('hello',args,kwargs)
     
 def on_message(response,*args,**kwargs):
     data = response# json.loads(response)
@@ -43,7 +30,6 @@ def on_message(response,*args,**kwargs):
 #     subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
 #     subscriber[0].value = data['value']
 
-@gen.coroutine #allows the websocket to be yielded
 class subscribableVariable(object):
     '''
     classdocs
@@ -55,7 +41,7 @@ class subscribableVariable(object):
         Constructor
         '''
         self.instance = instance
-        self.varName = varName
+        self.varName = varName        
         
         #add new subscription to class vars
         self.subscribe(sensorName, recipeInstance, 'value')
@@ -64,10 +50,16 @@ class subscribableVariable(object):
     def value(self): return getattr(self.instance,self.varName)
     @value.setter
     def value(self,value): setattr(self.instance,self.varName,value)
-        
+    
+    @gen.coroutine #allows the websocket to be yielded    
     def subscribe(self,name,recipeInstance,type='value'):
+        if self.websocket is None:
+            websocket_address = "ws:" + host + "/live/timeseries/socket/"
+            logging.info('No websocket established. Establishing at {}'.format(websocket_address))
+            self.websocket = yield websocket_connect(websocket_address,on_message_callback=on_message)        
+        
         if ((name,recipeInstance)) not in self.subscribers:
-            logging.debug('Subscribing to {}'.format(name))
+            logging.info('Subscribing to {}'.format(name))
             r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
             idSensor = r.json()['sensor']
             
@@ -76,14 +68,18 @@ class subscribableVariable(object):
             self.subscribers[(idSensor,recipeInstance)] = (self,type)
             
             logging.debug('Id is {}'.format(idSensor))
-            io_loop = IOLoop.current()
-            io_loop.add_future(self.websocket, self.write_subscription)
             
+            logging.debug("Subscribing with {}".format(self.websocket))
+            self.websocket.write_message(json.dumps({'recipe_instance':self.recipeInstance,'sensor':self.idSensor,'subscribe':True}))
+            
+#             io_loop = IOLoop.current()
+#             io_loop.add_future(self.websocket, self.write_subscription)
+                        
             logging.debug('Subscribed')
             
-    def write_subscription(self,*args,**kwargs):
-        print self.websocket
-        self.websocket.write_message(json.dumps({'recipe_instance':self.recipeInstance,'sensor':self.idSensor,'subscribe':True}))
+#     def write_subscription(self,*args,**kwargs):
+#         logging.debug("Subscribing with {} {} {}".format(self.websocket,args,kwargs))
+
 #     
 #     @classmethod
 #     def on_message(cls,response):
@@ -91,7 +87,7 @@ class subscribableVariable(object):
 #         logging.debug('websocket sent: {}'.format(data))
 #         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
 #         subscriber[0].value = data['value']
-    websocket = websocket_connect("ws:" + host + "/live/timeseries/socket/",callback=cbk,on_message_callback=on_message)
+    websocket = None
     
     subscribers = {}
 
