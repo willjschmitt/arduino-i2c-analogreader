@@ -68,6 +68,8 @@ class heatedVessel(temperatureMonitoredVessel):
         
         self.recalculateGains()
         
+    def setTemperature(self,value): self.temperatureSetPoint - value
+        
     def turnOff(self): self.elementStatus = self.pin.value = False
     def turnOn(self):  self.elementStatus = self.pin.value = True
     
