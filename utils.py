@@ -5,15 +5,16 @@ Created on Apr 14, 2016
 '''
 
 from tornado.websocket import websocket_connect
-from tornado.ioloop import IOLoop
 from tornado import gen
 
 import json
 import requests
-import logging
 import datetime
 import functools
 import pytz
+
+import logging
+logger = logging.getLogger('joulia.variables')
 
 from settings import host
 
@@ -23,12 +24,6 @@ def rsetattr(obj, attr, val):
 
 def rgetattr(obj, attr):
     return functools.reduce(getattr, [obj]+attr.split('__'))
-    
-def on_message(response,*args,**kwargs):
-    data = response# json.loads(response)
-    logging.debug('websocket sent: {}'.format(data))
-#     subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
-#     subscriber[0].value = data['value']
 
 class subscribableVariable(object):
     '''
@@ -41,7 +36,7 @@ class subscribableVariable(object):
         Constructor
         '''
         self.instance = instance
-        self.varName = varName        
+        self.varName = varName
         
         #add new subscription to class vars
         self.subscribe(sensorName, recipeInstance, 'value')
@@ -55,11 +50,11 @@ class subscribableVariable(object):
     def subscribe(self,name,recipeInstance,type='value'):
         if self.websocket is None:
             websocket_address = "ws:" + host + "/live/timeseries/socket/"
-            logging.info('No websocket established. Establishing at {}'.format(websocket_address))
-            self.websocket = yield websocket_connect(websocket_address,on_message_callback=on_message)        
+            logger.info('No websocket established. Establishing at {}'.format(websocket_address))
+            self.websocket = yield websocket_connect(websocket_address,on_message_callback=subscribableVariable.on_message)        
         
         if ((name,recipeInstance)) not in self.subscribers:
-            logging.info('Subscribing to {}'.format(name))
+            logger.info('Subscribing to {}'.format(name))
             r = requests.post(self.dataIdentifyService,data={'recipe_instance':recipeInstance,'name':name})
             idSensor = r.json()['sensor']
             
@@ -67,28 +62,27 @@ class subscribableVariable(object):
             self.recipeInstance = recipeInstance
             self.subscribers[(idSensor,recipeInstance)] = (self,type)
             
-            logging.debug('Id is {}'.format(idSensor))
+            logger.debug('Id is {}'.format(idSensor))
             
-            logging.debug("Subscribing with {}".format(self.websocket))
+            logger.debug("Subscribing with {}".format(self.websocket))
             self.websocket.write_message(json.dumps({'recipe_instance':self.recipeInstance,'sensor':self.idSensor,'subscribe':True}))
             
 #             io_loop = IOLoop.current()
 #             io_loop.add_future(self.websocket, self.write_subscription)
                         
-            logging.debug('Subscribed')
-            
-#     def write_subscription(self,*args,**kwargs):
-#         logging.debug("Subscribing with {} {} {}".format(self.websocket,args,kwargs))
-
-#     
-#     @classmethod
-#     def on_message(cls,response):
-#         data = json.loads(response)
-#         logging.debug('websocket sent: {}'.format(data))
-#         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
-#         subscriber[0].value = data['value']
-    websocket = None
+            logger.debug('Subscribed')
     
+    @classmethod        
+    def on_message(response,*args,**kwargs):
+        if response is not None:
+            data = json.loads(response)
+            logger.debug('websocket sent: {}'.format(data))
+            subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
+            subscriber[0].value = data['value']
+        else:
+            logger.debug('websocket closed')
+
+    websocket = None
     subscribers = {}
 
 # @gen.coroutine #allows the websocket to be yielded
@@ -118,7 +112,7 @@ class subscribableVariable(object):
 #     @classmethod
 #     def on_message(cls,response):
 #         data = json.loads(response)
-#         logging.debug('websocket sent: {}'.format(data))
+#         logger.debug('websocket sent: {}'.format(data))
 #         subscriber = cls.subscribers((data['sensor'],data['recipeInstance']))
 #         if subscriber[1] == 'value':
 #             subscriber[0].value = data['value']
@@ -160,11 +154,11 @@ class dataStreamer(object):
                         r = requests.post(self.dataIdentifyService,data={'recipe_instance':self.recipeInstance,'name':sensorName})
                         r.raise_for_status()
                     except requests.exceptions.ConnectionError:
-                        logging.info("Server not there. Will retry later.")
+                        logger.info("Server not there. Will retry later.")
                         self.timeOutCounter = self.timeOutWait
                         break
                     except requests.exceptions.HTTPError:
-                        logging.info("Server returned error status. Will retry later.")
+                        logger.info("Server returned error status. Will retry later.")
                         self.timeOutCounter = self.timeOutWait
                         break
                     
@@ -179,11 +173,11 @@ class dataStreamer(object):
                     )
                     r.raise_for_status()
                 except requests.exceptions.ConnectionError:
-                    logging.info("Server not there. Will retry later.")
+                    logger.info("Server not there. Will retry later.")
                     self.timeOutCounter = self.timeOutWait
                     break
                 except requests.exceptions.HTTPError:
-                    logging.info("Server returned error status. Will retry later.")
+                    logger.info("Server returned error status. Will retry later.")
                     self.timeOutCounter = self.timeOutWait
                     break
                     
