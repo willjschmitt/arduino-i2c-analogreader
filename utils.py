@@ -68,19 +68,20 @@ class subscribableVariable(object):
             
             logger.debug("Subscribing with {}".format(self.websocket))
             self.websocket.write_message(json.dumps({'recipe_instance':self.recipeInstance,'sensor':self.idSensor,'subscribe':True}))
-            
-#             io_loop = IOLoop.current()
-#             io_loop.add_future(self.websocket, self.write_subscription)
                         
             logger.debug('Subscribed')
     
     @classmethod        
-    def on_message(response,*args,**kwargs):
+    def on_message(cls,response,*args,**kwargs):
         if response is not None:
-            data = json.loads(response)
-            logger.debug('websocket sent: {}'.format(data))
-            subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
-            subscriber[0].value = data['value']
+            try:
+                data = json.loads(response)
+                logger.debug('websocket sent: {}'.format(data))
+                subscriber = subscribableVariable.subscribers((data['sensor'],data['recipeInstance']))
+                subscriber[0].value = data['value']
+            except:
+                logger.error("Got non data {}".format(response))
+            
         else:
             logger.debug('websocket closed')
 
