@@ -14,6 +14,7 @@ from vessels import heatedVessel,heatExchangedVessel
 from simplePump import simplePump
 
 import logging
+logger = logging.getLogger(__name__)
 
 class brewery(object):
     '''
@@ -24,21 +25,21 @@ class brewery(object):
         '''
         Constructor
         '''
-        logging.info('Initializing Brewery object')
+        logger.info('Initializing Brewery object')
         self.scheduler = sched.scheduler(time.time,time.sleep)
         
         self.recipeInstance = 1
         
         self.dataStreamer = dataStreamer(self,self.recipeInstance)
-#         self.dataStreamer.register('boilKettle__temperature')
-#         self.dataStreamer.register('boilKettle__temperatureSetPoint')
-#         self.dataStreamer.register('mashTun__temperature')
-#         self.dataStreamer.register('mashTun__temperatureSetPoint')
-#         self.dataStreamer.register('boilKettle__dutyCycle')
-#         self.dataStreamer.register('boilKettle__power')
-#         self.dataStreamer.register('systemEnergy')
-#         self.dataStreamer.register('systemEnergyCost')
-#         self.dataStreamer.register('state__id','state')
+        self.dataStreamer.register('boilKettle__temperature')
+        self.dataStreamer.register('boilKettle__temperatureSetPoint')
+        self.dataStreamer.register('mashTun__temperature')
+        self.dataStreamer.register('mashTun__temperatureSetPoint')
+        self.dataStreamer.register('boilKettle__dutyCycle')
+        self.dataStreamer.register('boilKettle__power')
+        self.dataStreamer.register('systemEnergy')
+        self.dataStreamer.register('systemEnergyCost')
+        self.dataStreamer.register('state__id','state')
         
         #state machine initialization
         self.state = stateMachine(self)
@@ -92,11 +93,9 @@ class brewery(object):
         
         a = ioloop.PeriodicCallback(self.task00,self.tm1Rate*1000)
         a.start()
-        ioloop.IOLoop.current().start()
-#         self.scheduler.run()
         
     def task00(self):
-        logging.debug('Evaluating task 00')
+        logger.debug('Evaluating task 00')
         self.wtime = time.time()
     
         # Evaluate state of controls (mash, pump, boil, etc)
@@ -116,7 +115,7 @@ class brewery(object):
         self.systemEnergy += (self.boilKettle.dutyCycle*self.boilKettle.rating)*((self.wtime-self.tm1_tz1)/(60.*60.))
         self.systemEnergyCost= self.systemEnergy/1000. * self.energyUnitCost
         
-        self.dataStreamer.postData()
+#         self.dataStreamer.postData()
         
         #schedule next task 1 event
         self.tm1_tz1 = self.wtime
@@ -124,9 +123,9 @@ class brewery(object):
     
 #     @gen.coroutine
 #     def connect(self):
-#         logging.debug('lets try {}'.format("ws:" + host + "/live/timeseries/socket/"))
+#         logger.debug('lets try {}'.format("ws:" + host + "/live/timeseries/socket/"))
 #         self.conn = yield websocket_connect("ws:" + host + "/live/timeseries/socket/")
-#         logging.debug('here {}'.format(self.conn))
+#         logger.debug('here {}'.format(self.conn))
 #         print('bs')
 #         self.conn.write_message({'subscribe':True})
         

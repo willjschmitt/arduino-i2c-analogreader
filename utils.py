@@ -6,6 +6,7 @@ Created on Apr 14, 2016
 
 from tornado.websocket import websocket_connect
 from tornado import gen
+from tornado import ioloop
 
 import json
 import requests
@@ -14,9 +15,10 @@ import functools
 import pytz
 
 import logging
-logger = logging.getLogger('joulia.variables')
+logger = logging.getLogger(__name__)
 
 from settings import host
+from settings import datastream_frequency
 
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('__')
@@ -47,7 +49,7 @@ class subscribableVariable(object):
     def value(self,value): setattr(self.instance,self.varName,value)
     
     @gen.coroutine #allows the websocket to be yielded    
-    def subscribe(self,name,recipeInstance,type='value'):
+    def subscribe(self,name,recipeInstance,var_type='value'):
         if self.websocket is None:
             websocket_address = "ws:" + host + "/live/timeseries/socket/"
             logger.info('No websocket established. Establishing at {}'.format(websocket_address))
@@ -60,7 +62,7 @@ class subscribableVariable(object):
             
             self.idSensor = idSensor
             self.recipeInstance = recipeInstance
-            self.subscribers[(idSensor,recipeInstance)] = (self,type)
+            self.subscribers[(idSensor,recipeInstance)] = (self,var_type)
             
             logger.debug('Id is {}'.format(idSensor))
             
@@ -135,6 +137,8 @@ class dataStreamer(object):
         self.sensorMap = {}
         self.timeOutCounter = 0
         
+        ioloop.PeriodicCallback(self.postData,datastream_frequency).start()
+        
     def register(self,attr,name=None):
         if name is None: name=attr #default to attribute as the name
         if name in self.sensorMap: raise AttributeError('{} already exists in streaming service.'.format(name)) #this makes sure we arent overwriting anything
@@ -144,6 +148,8 @@ class dataStreamer(object):
         if self.timeOutCounter > 0:
             self.timeOutCounter -= 1
         else:
+            logger.debug('Data streamer {} sending data.'.format(self))
+            
             #post temperature updates to server        
             sampleTime = datetime.datetime.now(tz=pytz.utc).isoformat()
             
