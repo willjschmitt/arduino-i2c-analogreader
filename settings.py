@@ -23,6 +23,9 @@ LOGGING_CONFIG = {
             'handlers': ['console'],   
             'propogate': True      
         },
+        'utils': {
+            'level': 'ERROR',
+        },
         'requests': {
             'level': 'ERROR',
             'handlers': ['console'],   

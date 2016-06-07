@@ -4,11 +4,15 @@ Created on Apr 5, 2016
 @author: William
 '''
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gpiocrust import OutputPin
+from utils import gpio_mock_api_active
 
 from measurement import rtdSensor
 
-from dsp import regulator
+from dsp import regulator, integrator
 
 class simpleVessel(object):
     '''
@@ -34,10 +38,17 @@ class temperatureMonitoredVessel(simpleVessel):
         super(temperatureMonitoredVessel,self).__init__(volume)
         
         self.temperatureSensor = rtdSensor(*rtdParams)
+        
+        #for simulation environment make an integrator to represent the absorbtion of energy     
+        if gpio_mock_api_active:
+            self.liquid_temperature_simulator = integrator(init=68.)
             
     @property
     def temperature(self):
-        return self.temperatureSensor.temperature
+        if gpio_mock_api_active:
+            return self.liquid_temperature_simulator.q
+        else:
+            return self.temperatureSensor.temperature
         
     def measureTemperature(self):
         return self.temperatureSensor.measure()
@@ -68,10 +79,16 @@ class heatedVessel(temperatureMonitoredVessel):
         
         self.recalculateGains()
         
-    def setTemperature(self,value): self.temperatureSetPoint - value
+    def setTemperature(self,value): 
+        logger.debug("Setting temperature {}".format(value))
+        self.temperatureSetPoint = value
         
-    def turnOff(self): self.elementStatus = self.pin.value = False
-    def turnOn(self):  self.elementStatus = self.pin.value = True
+    def turnOff(self):
+        self.elementStatus = self.pin.value = False
+        self.regulator.disable()
+    def turnOn(self):  
+        self.elementStatus = self.pin.value = True
+        self.regulator.enable()
     
     def setLiquidLevel(self,volume):
         self.volume = volume
@@ -82,10 +99,23 @@ class heatedVessel(temperatureMonitoredVessel):
         self.regulator.KI =  1.*(self.volume/self.rating)
         
     def regulate(self):
+        logger.debug("Temp: {}, SP: {}".format(self.temperature,self.temperatureSetPoint))
         self.dutyCycle = self.regulator.calculate(self.temperature,self.temperatureSetPoint)
+    
+    
+    def measureTemperature(self):
+        #lets here add heat to the vessel in simulation mode
+        if gpio_mock_api_active: return self.liquid_temperature_simulator.integrate(self.temperature_ramp)
+        
+        return super(heatedVessel,self).measureTemperature()
         
     @property
     def power(self): return self.dutyCycle * self.rating
+    
+    @property #returns degF/sec rate of change of liquid
+    def temperature_ramp(self):
+        return self.power/(self.volume*4.184*1000.)*(9./5.)*(1./3.79)
+
         
 class heatExchangedVessel(temperatureMonitoredVessel):
     '''
@@ -105,6 +135,11 @@ class heatExchangedVessel(temperatureMonitoredVessel):
         
         super(heatExchangedVessel,self).__init__(volume, rtdParams)
         self.recalculateGains()
+        
+    def turnOff(self):
+        self.regulator.disable()
+    def turnOn(self):
+        self.regulator.enable()
     
     def setTemperature(self,temp):
         self.temperatureSetPoint = temp

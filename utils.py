@@ -14,8 +14,7 @@ import datetime
 import functools
 import pytz
 
-import sys
-import traceback
+import gpiocrust
 
 import logging
 logger = logging.getLogger(__name__)
@@ -188,5 +187,6 @@ class dataStreamer(object):
                     self.timeOutCounter = self.timeOutWait
                     break
                     
-        
+                
+gpio_mock_api_active = 'gpio_mock' in dir(gpiocrust)
     
