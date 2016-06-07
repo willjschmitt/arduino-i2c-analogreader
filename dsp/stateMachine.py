@@ -4,6 +4,8 @@ Created on Apr 8, 2016
 @author: William
 '''
 
+import time
+
 class stateMachine(object):
     '''
     classdocs
@@ -23,6 +25,7 @@ class stateMachine(object):
         self.states.append(state)
         
     def changeState(self,stateRequested):
+        self.parent.state_t0 = time.time()
         if stateRequested is None:
             self.state = None
         else:

@@ -61,26 +61,24 @@ class brewery(object):
         self.state.changeState('statePrestart')
         self.stateWatcher = subscribableVariable(self.state, 'id', 'state',self.recipeInstance) #subscribes to remote var
     
-#         self.connect()
-    
         #initialize everything
-        self.boilKettle = heatedVessel(rating=5000.,volume=5.,rtdParams=[0,0.385,100.0,5.0,0.94,-16.0,10.],pin=0)
-        self.mashTun = heatExchangedVessel(volume=5.,rtdParams=[1,0.385,100.0,5.0,0.94,-9.0,10.],temperature_source = self.boilKettle)
-        self.mainPump = simplePump(pin=2)
-    
-        self.mashTemperatureProfile = [
-            [0.0, 152.0], #start at 152
-            [45.0,155.0], #at 45min step up to 155
-        ]
-        
         self.strikeTemperature = 162.
         self.mashoutTemperature = 170.
         self.mashoutTime = 10.*60. # in seconds
         self.boilTemperature = 217.
         self.coolTemperature = 70.
+        self.mashTemperatureProfile = [
+            [0.0, 152.0], #start at 152
+            [45.0,155.0], #at 45min step up to 155
+        ]
         
         self.systemEnergy = 0.
         self.energyUnitCost = 0.15 #$/kWh
+        
+        
+        self.boilKettle = heatedVessel(rating=5000.,volume=5.,rtdParams=[0,0.385,100.0,5.0,0.94,-16.0,10.],pin=0)
+        self.mashTun = heatExchangedVessel(volume=5.,rtdParams=[1,0.385,100.0,5.0,0.94,-9.0,10.],temperature_source = self.boilKettle,temperature_profile=self.mashTemperatureProfile)
+        self.mainPump = simplePump(pin=2)        
     
         #permission variables
         self.requestPermission = False
@@ -176,7 +174,7 @@ def stateStrike(breweryInstance):
     breweryInstance.boilKettle.turnOn()
     breweryInstance.mashTun.turnOff()
 
-    breweryInstance.boilKettle.setTemperature(breweryInstance.mashtemp)
+    breweryInstance.boilKettle.setTemperature(breweryInstance.mashTun.temperature_profile[0][1])
     
     if breweryInstance.grantPermission:
         breweryInstance.grantPermission = False
@@ -195,9 +193,9 @@ def statePostStrike(breweryInstance):
     breweryInstance.boilKettle.turnOn()
     breweryInstance.mashTun.turnOff()
 
-    breweryInstance.boilKettle.setTemperature(breweryInstance.mashtemp)
+    breweryInstance.boilKettle.setTemperature(breweryInstance.mashTun.temperature_profile[0][1])
 
-    if breweryInstance.boilKettle.temperature > breweryInstance.mashtemp:
+    if breweryInstance.boilKettle.temperature > breweryInstance.mashTun.temperatureSetPoint:
         if breweryInstance.grantPermission:
             breweryInstance.grantPermission = False
             breweryInstance.state.changeState('stateMash')
@@ -215,10 +213,10 @@ def stateMash(breweryInstance):
     breweryInstance.boilKettle.turnOn()
     breweryInstance.mashTun.turnOn()
 
-    breweryInstance.setTemperature(breweryInstance.mashTemp)
+    breweryInstance.mashTun.setTemperatureProfile(breweryInstance.state_t0)
     breweryInstance.timeT0 = time.time()
 
-    if breweryInstance.wtime > breweryInstance.timeT0 + breweryInstance.mashTime:
+    if breweryInstance.wtime > breweryInstance.timeT0 + breweryInstance.mashTun.temperature_profile_length:
         breweryInstance.state.changeState('stateMashout')
 
 def stateMashout(breweryInstance):
@@ -232,7 +230,7 @@ def stateMashout(breweryInstance):
     breweryInstance.boilKettle.turnOn()
     breweryInstance.mashTun.turnOn()
 
-    breweryInstance.setTemperature(breweryInstance.mashoutTemperature)
+    breweryInstance.mashTun.setTemperature(breweryInstance.mashoutTemperature)
     breweryInstance.boilKettle.setTemperature(breweryInstance.mashoutTemperature+5.) #give a little extra push on boil set temp 
     
     if breweryInstance.boilKettle.temperature > breweryInstance.mashoutTemperature:
@@ -251,7 +249,7 @@ def stateMashout2(breweryInstance):
     breweryInstance.boilKettle.turnOn()
     breweryInstance.mashTun.turnOff()
 
-    breweryInstance.setTemperature(breweryInstance.mashoutTemperature)
+    breweryInstance.mashTun.setTemperature(breweryInstance.mashoutTemperature)
     breweryInstance.timeT0 = time.time()
     if breweryInstance.wtime > breweryInstance.timeT0 + breweryInstance.mashoutTime:
         if breweryInstance.grantPermission:

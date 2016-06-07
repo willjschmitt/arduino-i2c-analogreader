@@ -7,6 +7,8 @@ Created on Apr 5, 2016
 import logging
 logger = logging.getLogger(__name__)
 
+import time
+
 from gpiocrust import OutputPin
 from utils import gpio_mock_api_active
 
@@ -141,6 +143,7 @@ class heatExchangedVessel(temperatureMonitoredVessel):
         self.enabled = False
  
         self.temperature_source = kwargs.get('temperature_source',None)
+        self.temperature_profile = kwargs.get('temperature_profile',None)
         
     def turnOff(self):
         self.enabled = False
@@ -151,6 +154,17 @@ class heatExchangedVessel(temperatureMonitoredVessel):
     
     def setTemperature(self,temp):
         self.temperatureSetPoint = temp
+
+    def setTemperatureProfile(self,time0):
+        if self.temperature_profile is not None:
+            for temp in self.temperature_profile:
+                if time.time() - time0 > temp[0]:
+                    self.setTemperature(temp[1])
+                    break
+                
+    @property
+    def temperature_profile_length(self):
+        return reduce(lambda x,y: x+y[0], self.temperature_profile,0.)
         
     def setLiquidLevel(self,volume):
         self.volume = volume
