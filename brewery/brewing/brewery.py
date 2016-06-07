@@ -65,7 +65,7 @@ class brewery(object):
     
         #initialize everything
         self.boilKettle = heatedVessel(rating=5000.,volume=5.,rtdParams=[0,0.385,100.0,5.0,0.94,-16.0,10.],pin=0)
-        self.mashTun = heatExchangedVessel(volume=5.,rtdParams=[1,0.385,100.0,5.0,0.94,-9.0,10.])
+        self.mashTun = heatExchangedVessel(volume=5.,rtdParams=[1,0.385,100.0,5.0,0.94,-9.0,10.],temperature_source = self.boilKettle)
         self.mainPump = simplePump(pin=2)
     
         self.mashTemperatureProfile = [
@@ -107,6 +107,7 @@ class brewery(object):
     
         # Controls Calculations for Mash Tun Element
         self.mashTun.regulate()
+        #TODO: probably need to figure out better option rather than just checking if its regulator is enabled
         if self.mashTun.regulator.enabled:
             self.boilKettle.setTemperature(self.mashTun.sourceTemperature)
     

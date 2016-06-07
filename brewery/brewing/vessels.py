@@ -95,8 +95,8 @@ class heatedVessel(temperatureMonitoredVessel):
         self.recalculateGains()
     
     def recalculateGains(self):
-        self.regulator.KP = 50.*(self.volume/self.rating)
-        self.regulator.KI =  1.*(self.volume/self.rating)
+        self.regulator.KP = 10.*(self.volume/self.rating)
+        self.regulator.KI = 100.*(self.volume/self.rating)
         
     def regulate(self):
         logger.debug("Temp: {}, SP: {}".format(self.temperature,self.temperatureSetPoint))
@@ -105,16 +105,18 @@ class heatedVessel(temperatureMonitoredVessel):
     
     def measureTemperature(self):
         #lets here add heat to the vessel in simulation mode
-        if gpio_mock_api_active: return self.liquid_temperature_simulator.integrate(self.temperature_ramp)
-        
-        return super(heatedVessel,self).measureTemperature()
+        if gpio_mock_api_active: 
+            return self.liquid_temperature_simulator.integrate(self.temperature_ramp)
+        else:
+            return super(heatedVessel,self).measureTemperature()
         
     @property
     def power(self): return self.dutyCycle * self.rating
     
     @property #returns degF/sec rate of change of liquid
     def temperature_ramp(self):
-        return self.power/(self.volume*4.184*1000.)*(9./5.)*(1./3.79)
+        #TODO: add better energy loss to environment
+        return (self.power - (self.temperature - 68.)*1.)/(self.volume*4.184*1000.)*(9./5.)*(1./3.79)
 
         
 class heatExchangedVessel(temperatureMonitoredVessel):
@@ -136,9 +138,15 @@ class heatExchangedVessel(temperatureMonitoredVessel):
         super(heatExchangedVessel,self).__init__(volume, rtdParams)
         self.recalculateGains()
         
+        self.enabled = False
+ 
+        self.temperature_source = kwargs.get('temperature_source',None)
+        
     def turnOff(self):
+        self.enabled = False
         self.regulator.disable()
     def turnOn(self):
+        self.enabled = True
         self.regulator.enable()
     
     def setTemperature(self,temp):
@@ -154,3 +162,18 @@ class heatExchangedVessel(temperatureMonitoredVessel):
     def recalculateGains(self):
         self.regulator.KP = 2.E-1*(self.volume/self.heatExchangerConductivity)
         self.regulator.KI = 2.E-3*(self.volume/self.heatExchangerConductivity)
+    
+    def measureTemperature(self):
+        #lets here add heat to the vessel in simulation mode
+        if gpio_mock_api_active: 
+            return self.liquid_temperature_simulator.integrate(self.temperature_ramp)
+        else:
+            return super(heatedVessel,self).measureTemperature()
+        
+    @property #returns degF/sec rate of change of liquid
+    def temperature_ramp(self):
+        #TODO: add better energy loss to environment
+        if self.temperature_source and self.enabled:
+            return (self.temperature_source.temperature - self.temperature) * self.heatExchangerConductivity
+        else:
+            return 0.
