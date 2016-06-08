@@ -69,8 +69,8 @@ class brewery(object):
         self.boilTemperature = 217.
         self.coolTemperature = 70.
         self.mashTemperatureProfile = [
-            [0.0, 152.0], #start at 152
-            [45.0,155.0], #at 45min step up to 155
+            [45.*60., 152.0], #start at 152
+            [15.*60.,155.0], #at 45min step up to 155
         ]
         
         self.systemEnergy = 0.
