@@ -172,9 +172,11 @@ class dataStreamer(object):
                     
                 #send the data
                 try:
+                    value = rgetattr(self.streamingClass,sensor['attr'])
                     r = requests.post(self.dataPostService,
                         data={'time':sampleTime,'recipe_instance':self.recipeInstance,
-                            'value':rgetattr(self.streamingClass,sensor['attr']),'sensor':sensor['id']
+                            'value': value if value is not None else 0., #TODO: make server accept None
+                            'sensor':sensor['id']
                         }
                     )
                     r.raise_for_status()
