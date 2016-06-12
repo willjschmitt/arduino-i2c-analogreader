@@ -7,7 +7,7 @@
 Tm1_BREWING::Tm1_BREWING(BREWERY_BUFFER** brewbuff_, const int& arduinofd_){
 	//
 	arduinofd = arduinofd_;
-	
+
 	//state machine initialization
 	C_State = 0;
 	C_State_t0 = 0.0;
@@ -45,7 +45,7 @@ Tm1_BREWING::Tm1_BREWING(BREWERY_BUFFER** brewbuff_, const int& arduinofd_){
 	//permission variables
 	requestpermission = 0;
 	grantpermission   = 0;
-	
+
 	//you're sexy
 
 	#ifdef warn2
@@ -56,6 +56,34 @@ Tm1_BREWING::Tm1_BREWING(BREWERY_BUFFER** brewbuff_, const int& arduinofd_){
 	ardprint("Done.",1);
 	#endif
 }
+
+//get functions
+double Tm1_BREWING::get_wtime()			{ return this->wtime; 			}
+double Tm1_BREWING::get_B_TempFil()		{ return this->B_TempFil; 		}
+double Tm1_BREWING::get_B_TempSet()		{ return this->B_TempSet.get_value(); }
+bool   Tm1_BREWING::get_B_TempSet_lock(){ return this->B_TempSet.get_locked(); }
+double Tm1_BREWING::get_B_ElemModInd()	{ return this->B_ElemModInd;	}
+double Tm1_BREWING::get_M_TempFil()		{ return this->M_TempFil; 		}
+double Tm1_BREWING::get_M_TempSet()		{ return this->M_TempSet.get_value(); 		}
+bool   Tm1_BREWING::get_M_TempSet_lock(){ return this->M_TempSet.get_locked(); }
+int    Tm1_BREWING::get_requestpermission(){ return this->requestpermission; 	}
+int    Tm1_BREWING::get_C_State()		{ return this->C_State; 			}
+double Tm1_BREWING::get_timeleft()      { return ((this->C_State_t0 + this->timer_time - this->wtime) / (1000.0*60.0)); }
+bool   Tm1_BREWING::get_timeleft_lock() { return this->timer_time.get_locked(); }
+
+
+//set functions
+void Tm1_BREWING::set_B_TempSet(const double& _in1)		{ this->B_TempSet.ovr_value(_in1); 		}
+void Tm1_BREWING::set_B_TempSet_lock(const bool& _in1)  { if (_in1) this->B_TempSet.lock(); else this->B_TempSet.unlock(); }
+void Tm1_BREWING::set_M_TempSet(const double& _in1)		{ this->M_TempSet.ovr_value(_in1); 		}
+void Tm1_BREWING::set_M_TempSet_lock(const bool& _in1)  { if (_in1) this->M_TempSet.lock(); else this->M_TempSet.unlock(); }
+void Tm1_BREWING::set_grantpermission(const int& _in1)	{ this->requestpermission = 0; this->grantpermission = _in1; 	}
+void Tm1_BREWING::set_C_State(const int& _in1)			{ this->C_State = _in1; 			}
+void Tm1_BREWING::set_timeleft(const double& newtime){
+	this->C_State_t0 = this->wtime;
+	this->timer_time.ovr_value(newtime*1000.0*60.0);
+}
+void Tm1_BREWING::set_timeleft_lock(const bool& lock)   { if (lock) this->timer_time.lock(); else this->timer_time.unlock(); }
 
 /***********************************************************************
 * Function: void Tm1
@@ -184,11 +212,11 @@ void Tm1_BREWING::Tm1(double wtime_){
 	ardprint("degF",0);
 
 	ardprint("  B_TempSet: ",0);
-	ardprint(B_TempSet,0);
+	ardprint(B_TempSet.get_value(),0);
 	ardprint("degF",0);
 
 	ardprint("  M_TempSet: ",0);
-	ardprint(M_TempSet,0);
+	ardprint(M_TempSet.get_value(),0);
 	ardprint("degF",1);
 	#endif
 
@@ -385,14 +413,16 @@ void Tm1_BREWING::Tm1_state(){
 
 		M_TempSet = M_MASHTEMP;
 
+		this->timer_time = this->MASH_TIME*1000.0;
+
 		#ifdef warn0
 		ardprint("Time left in Mash: ",0);
-		ardprint((C_State_t0 + MASH_TIME*1000.0 - wtime)/(1000.0*60.0),1);
+		ardprint((C_State_t0 + this->timer_time - wtime)/(1000.0*60.0),1);
 		#endif
 
 		//serialread=ardread();
 		serialread = grantpermission;
-		if (wtime > C_State_t0 + MASH_TIME*1000.0){
+		if (wtime > C_State_t0 + this->timer_time){
 			#ifdef warn0
   			ardprint("Mash done. Starting mashout.",1);
   			ardprint("Hit any key to continue.",1);
@@ -451,16 +481,18 @@ void Tm1_BREWING::Tm1_state(){
 
 		M_TempSet = 170.0;
 
+		this->timer_time = this->MASHOUT_TIME*1000.0;
+
 		#ifdef warn0
 		ardprint("Time left in Mashout: ",0);
-		ardprint((C_State_t0 + MASHOUT_TIME*1000.0 - wtime)/(1000.0*60.0),1);
+		ardprint((C_State_t0 + this->timer_time - wtime)/(1000.0*60.0),1);
 		#endif
 
 		//serialread=ardread();
 		serialread = grantpermission;
 		if (serialread=='w') C_State++;
 		else if (serialread=='s') C_State--;
-		else if (wtime > C_State_t0 + MASHOUT_TIME*1000.0){
+		else if (wtime > C_State_t0 + this->timer_time){
 			#ifdef warn0
   			ardprint("Mashout2 done. Stopping Pump.",1);
   			ardprint("Hit any key to continue.",1);
@@ -658,16 +690,18 @@ void Tm1_BREWING::Tm1_state(){
 
 		B_TempSet = B_BOILTEMP;
 
+		this->timer_time = this->BOIL_TIME*1000.0;
+
 		#ifdef warn0
 		ardprint("Time left in Boil: ",0);
-		ardprint((C_State_t0 + BOIL_TIME*1000.0 - wtime)/(1000.0*60.0),1);
+		ardprint((C_State_t0 + this->timer_time - wtime)/(1000.0*60.0),1);
 		#endif
 
 		//serialread=ardread();
 		serialread = grantpermission;
 		if      (serialread=='w') C_State++;
 		else if (serialread=='s') C_State--;
-		else if (wtime > C_State_t0 + BOIL_TIME*1000.0){
+		else if (wtime > C_State_t0 + this->timer_time){
 			#ifdef warn0
   			ardprint("Boil Over.",1);
 			ardprint("Turning boil element off.",1);
@@ -776,7 +810,7 @@ void Tm1_BREWING::Tm1_mash(){
 
 	if (M_Temp >= 0.0)//ignore error values below 0.0
 		M_TempFil += (M_Temp-M_TempFil)*(DelTm1/(M_WTempFil)); 	//first-order lag filter on Mash Temperature
-	M_TempErr    = (M_TempSet - M_TempFil); 				// calculate error from Mash set point and mash filter temperature
+	M_TempErr    = M_TempSet - M_TempFil; 				// calculate error from Mash set point and mash filter temperature
 
 	//Calculate Integral of error; if temperature has overshot, pull integral portion back FAST (there is no cooldown ability, so this is important)
 	if (M_TempErr > 0.0) M_TempErr_I += (M_TempErr)*(DelTm1);
@@ -785,9 +819,9 @@ void Tm1_BREWING::Tm1_mash(){
 	else if (M_TempErr_I < -1.0*M_TempErr_I_max) M_TempErr_I = -1.0*M_TempErr_I_max;
 
 	//Feedforward Mash temperature setpoint to boil then add Proportional and integral portions. Limit the boil setpoint to +/- the limiter around the Mash set point
-	B_TempSet = M_TempSet + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I;
-	if      (B_TempSet > (M_TempSet + M_TempSet_max)) B_TempSet = M_TempSet + M_TempSet_max;
-	else if (B_TempSet < (M_TempSet - M_TempSet_max)) B_TempSet = M_TempSet - M_TempSet_max;
+  B_TempSet = M_TempSet + M_ElemKp*M_TempErr + M_ElemKi*M_TempErr_I;
+  if      (B_TempSet > (M_TempSet + M_TempSet_max)) B_TempSet = M_TempSet + M_TempSet_max;
+  else if (B_TempSet < (M_TempSet - M_TempSet_max)) B_TempSet = M_TempSet - M_TempSet_max;
 
 	#ifdef warn2
 	ardprint("Done.",1);
@@ -805,7 +839,7 @@ void Tm1_BREWING::Tm1_boil(){
 
 	if (B_Temp >= 0.0) //ignore error values below 0.0
 		B_TempFil += (B_Temp-B_TempFil)*(DelTm1/(B_WTempFil));	//first-order lag filter on Boil Temperature
-	B_TempErr    = (B_TempSet - B_TempFil);					//calculate error from boil set point and boil filtered temperature
+	B_TempErr    = B_TempSet - B_TempFil;					//calculate error from boil set point and boil filtered temperature
 
 	//if Boil temp is less than 15deg of the boil set point, disable the PI loop, and set the element duty cycle to 100%s
 	if (B_TempErr > 15.0)
@@ -852,12 +886,4 @@ void Tm1_BREWING::MashTemp_Update(){
 	#ifdef warn2
   	ardprint("Done.",1);
 	#endif
-}
-double Tm1_BREWING::get_timeleft(){
-	if      (C_State == C_STATE_MASH)    return (this->C_State_t0 + this->MASH_TIME*1000.0    - this->wtime)/(1000.0*60.0);
-	else if (C_State == C_STATE_BOIL)    return (this->C_State_t0 + this->BOIL_TIME*1000.0    - this->wtime)/(1000.0*60.0);
-	else if (C_State == C_STATE_MASHOUT) return (this->C_State_t0 + this->MASHOUT_TIME*1000.0 - this->wtime)/(1000.0*60.0);
-	else return 0.0;
-	
-	
 }
